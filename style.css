@@ -1,0 +1,483 @@
+/* ========================================
+   PHOTO SHUSHU
+   Wedding Floral Background Version
+======================================== */
+
+
+/* ========================================
+   基本
+======================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+
+html,
+body {
+
+    margin: 0;
+    padding: 0;
+
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+}
+
+
+body {
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        #fffaf5;
+}
+
+
+
+/* ========================================
+   今回作った背景画像
+======================================== */
+
+.wedding-background {
+
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    background-image:
+        url("images/wedding-bg.png");
+
+    background-size:
+        cover;
+
+    background-position:
+        center center;
+
+    background-repeat:
+        no-repeat;
+
+    z-index:
+        0;
+
+    pointer-events:
+        none;
+}
+
+
+
+/* ========================================
+   写真が流れるエリア
+======================================== */
+
+#photoWall {
+
+    position:
+        relative;
+
+    width:
+        100vw;
+
+    height:
+        100vh;
+
+    overflow:
+        hidden;
+
+    z-index:
+        10;
+}
+
+
+
+/* ========================================
+   通常写真
+======================================== */
+
+.photo {
+
+    position:
+        absolute;
+
+    object-fit:
+        cover;
+
+    padding:
+        8px;
+
+    background:
+        white;
+
+    border-radius:
+        3px;
+
+    box-shadow:
+
+        0 12px 28px
+        rgba(100, 70, 80, 0.25),
+
+        0 3px 8px
+        rgba(100, 70, 80, 0.15);
+
+    opacity:
+        0;
+
+    will-change:
+        left,
+        transform,
+        opacity;
+}
+
+
+
+/* ========================================
+   写真 左 → 右
+======================================== */
+
+.photo-flow,
+.flow-photo {
+
+    animation:
+
+        photoFlow
+
+        var(--flow-duration)
+
+        linear
+
+        forwards;
+}
+
+
+@keyframes photoFlow {
+
+    0% {
+
+        left:
+            -300px;
+
+        opacity:
+            0;
+
+        transform:
+
+            rotate(
+                var(--rotation)
+            )
+
+            translateY(0);
+    }
+
+
+    5% {
+
+        opacity:
+            1;
+    }
+
+
+    50% {
+
+        opacity:
+            1;
+
+        transform:
+
+            rotate(
+                var(--rotation)
+            )
+
+            translateY(-10px);
+    }
+
+
+    95% {
+
+        opacity:
+            1;
+    }
+
+
+    100% {
+
+        left:
+            110vw;
+
+        opacity:
+            0;
+
+        transform:
+
+            rotate(
+                var(--rotation)
+            )
+
+            translateY(0);
+    }
+}
+
+
+
+/* ========================================
+   新しく送られた写真
+======================================== */
+
+.photo.new-photo {
+
+    position:
+        fixed;
+
+    z-index:
+        5000;
+
+    border:
+        8px solid white;
+
+    box-shadow:
+
+        0 25px 60px
+        rgba(120, 60, 80, 0.35);
+
+    animation:
+
+        newPhotoPop
+
+        3.8s
+
+        cubic-bezier(
+            0.18,
+            0.89,
+            0.32,
+            1.28
+        )
+
+        forwards;
+}
+
+
+@keyframes newPhotoPop {
+
+    0% {
+
+        opacity:
+            0;
+
+        transform:
+
+            translate(
+                -50%,
+                -50%
+            )
+
+            scale(0.1)
+
+            rotate(-180deg);
+    }
+
+
+    20% {
+
+        opacity:
+            1;
+
+        transform:
+
+            translate(
+                -50%,
+                -50%
+            )
+
+            scale(1.15)
+
+            rotate(30deg);
+    }
+
+
+    35% {
+
+        transform:
+
+            translate(
+                -50%,
+                -50%
+            )
+
+            scale(1.05)
+
+            rotate(-15deg);
+    }
+
+
+    50% {
+
+        transform:
+
+            translate(
+                -50%,
+                -50%
+            )
+
+            scale(1)
+
+            rotate(5deg);
+    }
+
+
+    75% {
+
+        opacity:
+            1;
+
+        transform:
+
+            translate(
+                -50%,
+                -50%
+            )
+
+            scale(1)
+
+            rotate(0deg);
+    }
+
+
+    100% {
+
+        opacity:
+            0;
+
+        transform:
+
+            translate(
+                -50%,
+                -50%
+            )
+
+            scale(0.75)
+
+            rotate(8deg);
+    }
+}
+
+
+
+/* ========================================
+   新着写真のキラキラ
+======================================== */
+
+.photo-sparkle {
+
+    position:
+        fixed;
+
+    width:
+        8px;
+
+    height:
+        8px;
+
+    background:
+        white;
+
+    border-radius:
+        50%;
+
+    pointer-events:
+        none;
+
+    z-index:
+        6000;
+
+    box-shadow:
+
+        0 0 8px white,
+
+        0 0 18px #fff2a0,
+
+        0 0 28px
+        rgba(255, 110, 165, 0.8);
+
+    animation:
+
+        sparkleAnimation
+
+        1.2s
+
+        ease-out
+
+        forwards;
+}
+
+
+@keyframes sparkleAnimation {
+
+    0% {
+
+        opacity:
+            0;
+
+        transform:
+            scale(0);
+    }
+
+
+    20% {
+
+        opacity:
+            1;
+
+        transform:
+            scale(1.5);
+    }
+
+
+    100% {
+
+        opacity:
+            0;
+
+        transform:
+
+            scale(0.2)
+
+            translate(
+                var(--sparkle-x),
+                var(--sparkle-y)
+            );
+    }
+}
+
+
+
+/* ========================================
+   スマホ
+======================================== */
+
+@media (
+    max-width: 600px
+) {
+
+    .wedding-background {
+
+        background-size:
+            cover;
+
+        background-position:
+            center center;
+    }
+
+
+    .photo {
+
+        padding:
+            5px;
+    }
+}
