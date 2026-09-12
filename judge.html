@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Photo Contest Judge</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family:
+                Arial,
+                "Hiragino Kaku Gothic ProN",
+                "Yu Gothic",
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #fff7fa,
+                    #fff9e9,
+                    #f4fff0
+                );
+
+            color: #57494e;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 16px 60px;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 0;
+            color: #d86f91;
+            font-size: 30px;
+        }
+
+        .subtitle {
+            text-align: center;
+            margin: 8px 0 24px;
+            color: #8f7e84;
+        }
+
+        .login-box {
+            max-width: 420px;
+            margin: 40px auto;
+            padding: 24px;
+
+            background: white;
+            border-radius: 20px;
+
+            box-shadow:
+                0 10px 30px
+                rgba(120, 80, 90, 0.14);
+        }
+
+        .login-box h2 {
+            text-align: center;
+            margin-top: 0;
+        }
+
+        input,
+        select,
+        button {
+            width: 100%;
+            font-size: 16px;
+        }
+
+        input,
+        select {
+            padding: 13px;
+
+            border-radius: 12px;
+
+            border:
+                2px solid
+                #ecc5d2;
+
+            background: white;
+        }
+
+        button {
+            margin-top: 14px;
+            padding: 14px;
+
+            border: none;
+            border-radius: 12px;
+
+            background: #e8789b;
+
+            color: white;
+
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #judgeArea {
+            display: none;
+        }
+
+        .toolbar {
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 12px;
+
+            margin-bottom: 18px;
+        }
+
+        .toolbar-box {
+            background: white;
+
+            padding: 14px;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 7px 22px
+                rgba(120, 80, 90, 0.10);
+        }
+
+        .toolbar-label {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        #status {
+            text-align: center;
+            margin-bottom: 16px;
+            min-height: 24px;
+            font-weight: bold;
+        }
+
+        .success {
+            color: #4d9860;
+        }
+
+        .error {
+            color: #cf5961;
+        }
+
+        .loading {
+            color: #bf813e;
+        }
+
+        .photo-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fill,
+                    minmax(220px, 1fr)
+                );
+
+            gap: 16px;
+        }
+
+        .photo-card {
+            background: white;
+
+            border-radius: 18px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 8px 22px
+                rgba(100, 70, 80, 0.12);
+
+            border:
+                3px solid transparent;
+        }
+
+        .photo-card.selected {
+            border-color: #ef8cab;
+        }
+
+        .image-wrapper {
+            position: relative;
+
+            width: 100%;
+
+            aspect-ratio: 1 / 1;
+
+            background:
+                #f3eeee;
+
+            overflow: hidden;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+
+            display: block;
+        }
+
+        .image-error {
+            display: none;
+
+            position: absolute;
+
+            inset: 0;
+
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+
+            padding: 20px;
+
+            background:
+                #f6f1f2;
+
+            color:
+                #9a7d86;
+
+            font-size: 14px;
+
+            line-height: 1.6;
+        }
+
+        .photo-info {
+            padding: 12px;
+        }
+
+        .nickname {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .award-badge {
+            display: inline-block;
+
+            padding: 5px 9px;
+
+            border-radius: 999px;
+
+            background: #fff1b8;
+
+            color: #8d6b10;
+
+            font-size: 12px;
+            font-weight: bold;
+
+            margin-bottom: 8px;
+        }
+
+        .select-button {
+            background:
+                linear-gradient(
+                    135deg,
+                    #ef8cab,
+                    #e17095
+                );
+        }
+
+        .clear-button {
+            background: #9a8f93;
+        }
+
+        @media (max-width: 650px) {
+
+            .toolbar {
+                grid-template-columns:
+                    1fr;
+            }
+
+            .photo-grid {
+                grid-template-columns:
+                    repeat(2, 1fr);
+
+                gap: 10px;
+            }
+
+            .photo-info {
+                padding: 10px;
+            }
+
+            .nickname {
+                font-size: 14px;
+            }
+
+            button {
+                font-size: 14px;
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Photo Contest</h1>
+
+    <div class="subtitle">
+        RYUNOSUKE & MAKOTO
+    </div>
+
+
+    <div
+        id="loginBox"
+        class="login-box"
+    >
+
+        <h2>選考ページ</h2>
+
+        <input
+            type="password"
+            id="judgeCode"
+            placeholder="暗証番号を入力"
+        >
+
+        <button
+            id="loginButton"
+            type="button"
+        >
+            選考を開始
+        </button>
+
+    </div>
+
+
+    <div id="judgeArea">
+
+        <div class="toolbar">
+
+            <div class="toolbar-box">
+
+                <div class="toolbar-label">
+                    選ぶ賞
+                </div>
+
+                <select id="awardSelect">
+
+                    <option value="BEST PHOTO">
+                        BEST PHOTO
+                    </option>
+
+                    <option value="ベストスマイル賞">
+                        ベストスマイル賞
+                    </option>
+
+                    <option value="おもしろフォト賞">
+                        おもしろフォト賞
+                    </option>
+
+                    <option value="新郎新婦賞">
+                        新郎新婦賞
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="toolbar-box">
+
+                <div class="toolbar-label">
+                    操作
+                </div>
+
+                <button
+                    id="reloadButton"
+                    type="button"
+                    style="margin-top:0;"
+                >
+                    写真を更新
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div id="status"></div>
+
+        <div
+            id="photoGrid"
+            class="photo-grid"
+        ></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const SUPABASE_URL =
+    "https://tnqnowlvtnrzrcydcsmi.supabase.co";
+
+
+const SUPABASE_ANON_KEY =
+    "sb_publishable_Mp7PsY2wh5VZtEDYC9fHrg_wvFDa8rO";
+
+
+const JUDGE_CODE =
+    "0222";
+
+
+const loginBox =
+    document.getElementById("loginBox");
+
+const judgeArea =
+    document.getElementById("judgeArea");
+
+const judgeCode =
+    document.getElementById("judgeCode");
+
+const loginButton =
+    document.getElementById("loginButton");
+
+const awardSelect =
+    document.getElementById("awardSelect");
+
+const reloadButton =
+    document.getElementById("reloadButton");
+
+const photoGrid =
+    document.getElementById("photoGrid");
+
+const status =
+    document.getElementById("status");
+
+
+let currentPhotos = [];
+
+
+/* =========================
+   ログイン
+========================= */
+
+loginButton.addEventListener(
+    "click",
+    () => {
+
+        if (
+            judgeCode.value
+            !== JUDGE_CODE
+        ) {
+
+            alert(
+                "暗証番号が違います。"
+            );
+
+            return;
+        }
+
+        loginBox.style.display =
+            "none";
+
+        judgeArea.style.display =
+            "block";
+
+        loadPhotos();
+    }
+);
+
+
+/* =========================
+   写真取得
+========================= */
+
+async function loadPhotos() {
+
+    status.className =
+        "loading";
+
+    status.textContent =
+        "写真を読み込んでいます…";
+
+
+    try {
+
+        const response =
+            await fetch(
+                SUPABASE_URL
+                +
+                "/rest/v1/photos"
+                +
+                "?select=id,image_url,nickname,award,created_at"
+                +
+                "&order=created_at.desc",
+                {
+                    headers: {
+                        "apikey":
+                            SUPABASE_ANON_KEY,
+
+                        "Authorization":
+                            "Bearer "
+                            +
+                            SUPABASE_ANON_KEY
+                    }
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                await response.text()
+            );
+        }
+
+
+        currentPhotos =
+            await response.json();
+
+
+        renderPhotos();
+
+
+        status.className =
+            "success";
+
+        status.textContent =
+            currentPhotos.length
+            +
+            "枚の写真を表示中";
+
+    } catch (error) {
+
+        console.error(error);
+
+        status.className =
+            "error";
+
+        status.textContent =
+            "写真を読み込めませんでした。";
+    }
+}
+
+
+/* =========================
+   写真表示
+========================= */
+
+function renderPhotos() {
+
+    photoGrid.innerHTML =
+        "";
+
+
+    currentPhotos.forEach(
+        photo => {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+            card.className =
+                "photo-card";
+
+
+            if (photo.award) {
+
+                card.classList.add(
+                    "selected"
+                );
+            }
+
+
+            const imageWrapper =
+                document.createElement(
+                    "div"
+                );
+
+            imageWrapper.className =
+                "image-wrapper";
+
+
+            const img =
+                document.createElement(
+                    "img"
+                );
+
+
+            const imageError =
+                document.createElement(
+                    "div"
+                );
+
+            imageError.className =
+                "image-error";
+
+            imageError.innerHTML =
+                "この画像を<br>読み込めません";
+
+
+            img.onload =
+                () => {
+
+                    img.style.display =
+                        "block";
+
+                    imageError.style.display =
+                        "none";
+                };
+
+
+            img.onerror =
+                () => {
+
+                    img.style.display =
+                        "none";
+
+                    imageError.style.display =
+                        "flex";
+                };
+
+
+            img.src =
+                photo.image_url;
+
+
+            imageWrapper.appendChild(
+                img
+            );
+
+            imageWrapper.appendChild(
+                imageError
+            );
+
+
+            const info =
+                document.createElement(
+                    "div"
+                );
+
+            info.className =
+                "photo-info";
+
+
+            const nickname =
+                document.createElement(
+                    "div"
+                );
+
+            nickname.className =
+                "nickname";
+
+            nickname.textContent =
+                photo.nickname
+                ||
+                "ニックネームなし";
+
+
+            info.appendChild(
+                nickname
+            );
+
+
+            if (photo.award) {
+
+                const badge =
+                    document.createElement(
+                        "div"
+                    );
+
+                badge.className =
+                    "award-badge";
+
+                badge.textContent =
+                    "🏆 "
+                    +
+                    photo.award;
+
+                info.appendChild(
+                    badge
+                );
+            }
+
+
+            const selectButton =
+                document.createElement(
+                    "button"
+                );
+
+            selectButton.className =
+                "select-button";
+
+
+            selectButton.textContent =
+                photo.award
+                ?
+                "賞を変更する"
+                :
+                "この写真を選ぶ";
+
+
+            selectButton.addEventListener(
+                "click",
+                () => {
+
+                    setAward(
+                        photo.id,
+                        awardSelect.value
+                    );
+                }
+            );
+
+
+            info.appendChild(
+                selectButton
+            );
+
+
+            if (photo.award) {
+
+                const clearButton =
+                    document.createElement(
+                        "button"
+                    );
+
+                clearButton.className =
+                    "clear-button";
+
+                clearButton.textContent =
+                    "選択を解除";
+
+
+                clearButton.addEventListener(
+                    "click",
+                    () => {
+
+                        setAward(
+                            photo.id,
+                            ""
+                        );
+                    }
+                );
+
+
+                info.appendChild(
+                    clearButton
+                );
+            }
+
+
+            card.appendChild(
+                imageWrapper
+            );
+
+            card.appendChild(
+                info
+            );
+
+            photoGrid.appendChild(
+                card
+            );
+        }
+    );
+}
+
+
+/* =========================
+   賞を設定
+========================= */
+
+async function setAward(
+    photoId,
+    award
+) {
+
+    const label =
+        award
+        ||
+        "選択解除";
+
+
+    const confirmed =
+        confirm(
+            label
+            +
+            " にしますか？"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    status.className =
+        "loading";
+
+    status.textContent =
+        "保存しています…";
+
+
+    try {
+
+        const response =
+            await fetch(
+                SUPABASE_URL
+                +
+                "/rest/v1/rpc/set_photo_award",
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "apikey":
+                            SUPABASE_ANON_KEY,
+
+                        "Authorization":
+                            "Bearer "
+                            +
+                            SUPABASE_ANON_KEY,
+
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(
+                            {
+                                p_photo_id:
+                                    photoId,
+
+                                p_award:
+                                    award,
+
+                                p_code:
+                                    JUDGE_CODE
+                            }
+                        )
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                await response.text()
+            );
+        }
+
+
+        await loadPhotos();
+
+
+        status.className =
+            "success";
+
+        status.textContent =
+            award
+            ?
+            "受賞写真を保存しました。"
+            :
+            "選択を解除しました。";
+
+    } catch (error) {
+
+        console.error(error);
+
+        status.className =
+            "error";
+
+        status.textContent =
+            "保存できませんでした。";
+    }
+}
+
+
+/* =========================
+   更新
+========================= */
+
+reloadButton.addEventListener(
+    "click",
+    loadPhotos
+);
+
+</script>
+
+</body>
+</html>
