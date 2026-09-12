@@ -17,6 +17,7 @@
 
         body {
             margin: 0;
+
             font-family:
                 Arial,
                 "Hiragino Kaku Gothic ProN",
@@ -81,7 +82,6 @@
         input,
         select {
             padding: 13px;
-
             border-radius: 12px;
 
             border:
@@ -122,15 +122,12 @@
                 1fr 1fr;
 
             gap: 12px;
-
             margin-bottom: 18px;
         }
 
         .toolbar-box {
             background: white;
-
             padding: 14px;
-
             border-radius: 16px;
 
             box-shadow:
@@ -177,9 +174,7 @@
 
         .photo-card {
             background: white;
-
             border-radius: 18px;
-
             overflow: hidden;
 
             box-shadow:
@@ -196,23 +191,16 @@
 
         .image-wrapper {
             position: relative;
-
             width: 100%;
-
             aspect-ratio: 1 / 1;
-
-            background:
-                #f3eeee;
-
+            background: #f3eeee;
             overflow: hidden;
         }
 
         .image-wrapper img {
             width: 100%;
             height: 100%;
-
             object-fit: cover;
-
             display: block;
         }
 
@@ -220,7 +208,6 @@
             display: none;
 
             position: absolute;
-
             inset: 0;
 
             align-items: center;
@@ -230,14 +217,10 @@
 
             padding: 20px;
 
-            background:
-                #f6f1f2;
-
-            color:
-                #9a7d86;
+            background: #f6f1f2;
+            color: #9a7d86;
 
             font-size: 14px;
-
             line-height: 1.6;
         }
 
@@ -259,7 +242,6 @@
             border-radius: 999px;
 
             background: #fff1b8;
-
             color: #8d6b10;
 
             font-size: 12px;
@@ -277,6 +259,17 @@
                 );
         }
 
+        .announce-button {
+            background:
+                linear-gradient(
+                    135deg,
+                    #f0b83f,
+                    #e8962f
+                );
+
+            color: white;
+        }
+
         .clear-button {
             background: #9a8f93;
         }
@@ -284,8 +277,7 @@
         @media (max-width: 650px) {
 
             .toolbar {
-                grid-template-columns:
-                    1fr;
+                grid-template-columns: 1fr;
             }
 
             .photo-grid {
@@ -503,7 +495,7 @@ async function loadPhotos() {
                 +
                 "/rest/v1/photos"
                 +
-                "?select=id,image_url,nickname,award,created_at"
+                "?select=id,image_url,nickname,award,created_at,announced_at"
                 +
                 "&order=created_at.desc",
                 {
@@ -733,6 +725,36 @@ function renderPhotos() {
 
             if (photo.award) {
 
+                const announceButton =
+                    document.createElement(
+                        "button"
+                    );
+
+                announceButton.className =
+                    "announce-button";
+
+                announceButton.textContent =
+                    "🎉 会場で発表する";
+
+
+                announceButton.addEventListener(
+                    "click",
+                    () => {
+
+                        announcePhoto(
+                            photo.id,
+                            photo.award,
+                            photo.nickname
+                        );
+                    }
+                );
+
+
+                info.appendChild(
+                    announceButton
+                );
+
+
                 const clearButton =
                     document.createElement(
                         "button"
@@ -885,6 +907,116 @@ async function setAward(
 
         status.textContent =
             "保存できませんでした。";
+    }
+}
+
+
+/* =========================
+   会場で発表
+========================= */
+
+async function announcePhoto(
+    photoId,
+    award,
+    nickname
+) {
+
+    const displayName =
+        nickname
+        ||
+        "ゲスト";
+
+
+    const confirmed =
+        confirm(
+            "「"
+            +
+            award
+            +
+            "」\n"
+            +
+            displayName
+            +
+            "さんの写真を\n会場で発表しますか？"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    status.className =
+        "loading";
+
+    status.textContent =
+        "会場へ発表しています…";
+
+
+    try {
+
+        const response =
+            await fetch(
+                SUPABASE_URL
+                +
+                "/rest/v1/rpc/announce_photo_award",
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "apikey":
+                            SUPABASE_ANON_KEY,
+
+                        "Authorization":
+                            "Bearer "
+                            +
+                            SUPABASE_ANON_KEY,
+
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(
+                            {
+                                p_photo_id:
+                                    photoId,
+
+                                p_code:
+                                    JUDGE_CODE
+                            }
+                        )
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                await response.text()
+            );
+        }
+
+
+        status.className =
+            "success";
+
+        status.textContent =
+            "🎉 会場へ発表しました！";
+
+
+        await loadPhotos();
+
+    } catch (error) {
+
+        console.error(error);
+
+        status.className =
+            "error";
+
+        status.textContent =
+            "会場へ発表できませんでした。";
     }
 }
 
