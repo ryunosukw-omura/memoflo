@@ -1,8 +1,13 @@
-/* ========================================
+/* =========================================================
    PHOTO SHUSHU
-   Award Announcement System
-   何度でも発表できる修正版
-======================================== */
+   Wedding Photo Contest
+   Stable Award Announcement
+========================================================= */
+
+
+/* =========================================================
+   Supabase
+========================================================= */
 
 const AWARD_SUPABASE_URL =
     "https://tnqnowlvtnrzrcydcsmi.supabase.co";
@@ -12,10 +17,6 @@ const AWARD_SUPABASE_ANON_KEY =
     "sb_publishable_Mp7PsY2wh5VZtEDYC9fHrg_wvFDa8rO";
 
 
-/* ========================================
-   Supabase
-======================================== */
-
 const awardSupabase =
     window.supabase.createClient(
         AWARD_SUPABASE_URL,
@@ -23,15 +24,279 @@ const awardSupabase =
     );
 
 
-let lastAnnouncement = null;
-let awardTimer = null;
+/* =========================================================
+   時間設定
+========================================================= */
+
+const DRUMROLL_TIME = 10000;
+
+const WINNER_DISPLAY_TIME = 10000;
 
 
-/* ========================================
-   発表画面を作る
-======================================== */
+/* =========================================================
+   状態
+========================================================= */
 
-function createAwardOverlay() {
+let lastAnnouncement = "";
+
+let introTimer = null;
+
+let hideTimer = null;
+
+let drumrollAudio = null;
+
+let applauseAudio = null;
+
+let soundReady = false;
+
+let soundPreparing = false;
+
+
+/* =========================================================
+   音声作成
+========================================================= */
+
+function createAwardAudio() {
+
+    drumrollAudio =
+        new Audio(
+            "sounds/SE114_3.mp3"
+        );
+
+
+    applauseAudio =
+        new Audio(
+            "sounds/winner_applause_5sec.mp3"
+        );
+
+
+    drumrollAudio.preload =
+        "auto";
+
+
+    applauseAudio.preload =
+        "auto";
+
+
+    drumrollAudio.volume =
+        0.9;
+
+
+    applauseAudio.volume =
+        1.0;
+
+
+    drumrollAudio.load();
+
+    applauseAudio.load();
+}
+
+
+/* =========================================================
+   音声読み込み待ち
+========================================================= */
+
+function waitForAudioReady(
+    audio,
+    timeout = 8000
+) {
+
+    return new Promise(
+        resolve => {
+
+            if (
+                audio.readyState >= 3
+            ) {
+
+                resolve(
+                    true
+                );
+
+                return;
+            }
+
+
+            let finished =
+                false;
+
+
+            const finish =
+                result => {
+
+                    if (
+                        finished
+                    ) {
+                        return;
+                    }
+
+
+                    finished =
+                        true;
+
+
+                    audio.removeEventListener(
+                        "canplaythrough",
+                        onReady
+                    );
+
+
+                    audio.removeEventListener(
+                        "canplay",
+                        onReady
+                    );
+
+
+                    clearTimeout(
+                        timeoutId
+                    );
+
+
+                    resolve(
+                        result
+                    );
+                };
+
+
+            const onReady =
+                () => {
+
+                    finish(
+                        true
+                    );
+                };
+
+
+            audio.addEventListener(
+                "canplaythrough",
+                onReady
+            );
+
+
+            audio.addEventListener(
+                "canplay",
+                onReady
+            );
+
+
+            const timeoutId =
+                setTimeout(
+                    () => {
+
+                        finish(
+                            audio.readyState >= 2
+                        );
+
+                    },
+                    timeout
+                );
+
+
+            audio.load();
+        }
+    );
+}
+
+
+/* =========================================================
+   安定再生
+========================================================= */
+
+async function safePlay(
+    audio,
+    label
+) {
+
+    if (
+        !audio
+    ) {
+
+        console.log(
+            label,
+            "音声がありません"
+        );
+
+        return false;
+    }
+
+
+    try {
+
+        audio.pause();
+
+        audio.currentTime =
+            0;
+
+
+        await audio.play();
+
+
+        return true;
+
+    }
+    catch (
+        error
+    ) {
+
+        console.log(
+            label,
+            "1回目の再生失敗",
+            error
+        );
+    }
+
+
+    /* ---------------------------------
+       1回だけ再読み込みして再試行
+    --------------------------------- */
+
+    try {
+
+        audio.load();
+
+
+        await waitForAudioReady(
+            audio,
+            2500
+        );
+
+
+        audio.currentTime =
+            0;
+
+
+        await audio.play();
+
+
+        console.log(
+            label,
+            "再試行で再生成功"
+        );
+
+
+        return true;
+
+    }
+    catch (
+        error
+    ) {
+
+        console.log(
+            label,
+            "再試行も失敗",
+            error
+        );
+
+
+        return false;
+    }
+}
+
+
+/* =========================================================
+   発表画面
+========================================================= */
+
+function createAwardScreen() {
 
     if (
         document.getElementById(
@@ -53,24 +318,81 @@ function createAwardOverlay() {
 
 
     overlay.innerHTML = `
-        <div class="award-content">
 
-            <div class="award-trophy">
+        <div
+            class="award-blackout"
+        ></div>
+
+
+        <div
+            class="
+                award-light
+                award-light-left
+            "
+        ></div>
+
+
+        <div
+            class="
+                award-light
+                award-light-right
+            "
+        ></div>
+
+
+        <div
+            id="awardIntro"
+            class="award-intro"
+        >
+
+            <div
+                class="award-small-title"
+            >
+                WEDDING
+            </div>
+
+            <div
+                class="award-main-title"
+            >
+                PHOTO CONTEST
+            </div>
+
+            <div
+                class="award-line"
+            ></div>
+
+            <div
+                class="award-waiting"
+            >
+                AND THE WINNER IS...
+            </div>
+
+        </div>
+
+
+        <div
+            id="awardWinner"
+            class="award-winner"
+        >
+
+            <div
+                class="award-trophy"
+            >
                 🏆
             </div>
 
             <div
-                id="awardTitle"
-                class="award-title"
+                id="awardName"
+                class="award-name"
             >
                 BEST PHOTO
             </div>
 
             <div
-                class="award-image-frame"
+                class="award-photo-frame"
             >
                 <img
-                    id="awardImage"
+                    id="awardPhoto"
                     alt="受賞写真"
                 >
             </div>
@@ -87,6 +409,29 @@ function createAwardOverlay() {
             </div>
 
         </div>
+
+
+        <div
+            id="awardCrackerLeft"
+            class="
+                award-cracker
+                award-cracker-left
+            "
+        >
+            🎉
+        </div>
+
+
+        <div
+            id="awardCrackerRight"
+            class="
+                award-cracker
+                award-cracker-right
+            "
+        >
+            🎉
+        </div>
+
     `;
 
 
@@ -95,19 +440,19 @@ function createAwardOverlay() {
     );
 
 
-    addAwardStyles();
+    createAwardStyles();
 }
 
 
-/* ========================================
-   デザイン
-======================================== */
+/* =========================================================
+   CSS
+========================================================= */
 
-function addAwardStyles() {
+function createAwardStyles() {
 
     if (
         document.getElementById(
-            "awardStyles"
+            "awardStyle"
         )
     ) {
         return;
@@ -121,7 +466,7 @@ function addAwardStyles() {
 
 
     style.id =
-        "awardStyles";
+        "awardStyle";
 
 
     style.textContent = `
@@ -140,59 +485,279 @@ function addAwardStyles() {
 
             justify-content: center;
 
-            text-align: center;
-
             overflow: hidden;
+
+            opacity: 0;
+
+            pointer-events: none;
+        }
+
+
+        #awardOverlay.award-active {
+
+            display: flex;
+
+            opacity: 1;
+
+            pointer-events: auto;
+        }
+
+
+        #awardOverlay.award-fadeout {
+
+            animation:
+                awardFadeOut
+                1s
+                ease
+                forwards;
+        }
+
+
+        .award-blackout {
+
+            position: absolute;
+
+            inset: 0;
 
             background:
                 radial-gradient(
                     circle at center,
-                    rgba(255,255,255,0.98),
-                    rgba(255,236,242,0.97),
-                    rgba(255,247,213,0.97)
+                    rgba(30,25,20,0.82) 0%,
+                    rgba(5,5,8,0.96) 65%,
+                    rgba(0,0,0,1) 100%
+                );
+
+            opacity: 0;
+
+            animation:
+                awardBlackout
+                1.5s
+                ease
+                forwards;
+        }
+
+
+        .award-light {
+
+            position: absolute;
+
+            top: -35vh;
+
+            width: 48vw;
+
+            height: 160vh;
+
+            opacity: 0;
+
+            background:
+                linear-gradient(
+                    to bottom,
+                    rgba(255,245,190,0.85),
+                    rgba(255,236,170,0.25) 38%,
+                    rgba(255,255,255,0.02) 80%
+                );
+
+            clip-path:
+                polygon(
+                    46% 0,
+                    54% 0,
+                    100% 100%,
+                    0 100%
+                );
+
+            filter:
+                blur(7px);
+
+            transform-origin:
+                top center;
+
+            pointer-events: none;
+        }
+
+
+        .award-light-left {
+
+            left: -19vw;
+
+            animation:
+                awardLightLeft
+                3.2s
+                ease-in-out
+                infinite
+                alternate;
+        }
+
+
+        .award-light-right {
+
+            right: -19vw;
+
+            animation:
+                awardLightRight
+                3.6s
+                ease-in-out
+                infinite
+                alternate;
+        }
+
+
+        .award-intro {
+
+            position: relative;
+
+            z-index: 20;
+
+            text-align: center;
+
+            color: white;
+
+            width: 92vw;
+
+            opacity: 0;
+
+            animation:
+                awardIntroIn
+                1.5s
+                0.5s
+                ease
+                forwards;
+        }
+
+
+        .award-small-title {
+
+            font-size:
+                clamp(
+                    18px,
+                    2vw,
+                    30px
+                );
+
+            letter-spacing: 10px;
+
+            font-weight: 500;
+
+            color:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.72
                 );
         }
 
 
-        #awardOverlay.show {
+        .award-main-title {
 
-            display: flex;
+            margin-top: 10px;
 
-            animation:
-                awardFadeIn
-                0.8s
-                ease
-                forwards;
+            font-size:
+                clamp(
+                    44px,
+                    7vw,
+                    105px
+                );
+
+            font-weight: 900;
+
+            letter-spacing: 5px;
+
+            color: white;
+
+            text-shadow:
+                0 0 30px
+                rgba(
+                    255,
+                    220,
+                    140,
+                    0.32
+                );
         }
 
 
-        #awardOverlay.hide {
+        .award-line {
 
-            display: flex;
+            width: 120px;
 
-            animation:
-                awardFadeOut
-                0.8s
-                ease
-                forwards;
+            height: 2px;
+
+            margin:
+                30px
+                auto;
+
+            background:
+                linear-gradient(
+                    to right,
+                    transparent,
+                    #ffd977,
+                    transparent
+                );
         }
 
 
-        .award-content {
+        .award-waiting {
 
-            width: 90vw;
+            margin-top: 15px;
 
-            max-width: 900px;
+            font-size:
+                clamp(
+                    26px,
+                    4vw,
+                    58px
+                );
 
-            max-height: 95vh;
+            font-weight: 700;
 
-            display: flex;
+            letter-spacing: 4px;
+
+            color: #ffe7a2;
+
+            animation:
+                awardWaitingPulse
+                1.25s
+                ease-in-out
+                infinite;
+        }
+
+
+        .award-winner {
+
+            position: relative;
+
+            z-index: 40;
+
+            width: 94vw;
+
+            height: 96vh;
+
+            display: none;
 
             flex-direction: column;
 
+            justify-content: center;
+
             align-items: center;
 
-            justify-content: center;
+            text-align: center;
+
+            opacity: 0;
+        }
+
+
+        .award-winner.show {
+
+            display: flex;
+
+            animation:
+                awardWinnerIn
+                0.8s
+                cubic-bezier(
+                    0.18,
+                    0.89,
+                    0.32,
+                    1.28
+                )
+                forwards;
         }
 
 
@@ -202,117 +767,190 @@ function addAwardStyles() {
                 clamp(
                     55px,
                     7vw,
-                    95px
+                    100px
                 );
 
+            line-height: 1;
+
             animation:
-                trophyPop
-                1s
-                ease;
+                awardTrophy
+                1.1s
+                ease-out;
         }
 
 
-        .award-title {
+        .award-name {
 
-            margin-top: 5px;
+            margin-top: 4px;
 
             font-size:
                 clamp(
-                    34px,
+                    36px,
                     5vw,
-                    70px
+                    74px
                 );
 
             font-weight: 900;
 
-            color: #d69a25;
-
             letter-spacing: 3px;
 
+            color: #ffd76b;
+
             text-shadow:
-                0 3px 0 white,
-                0 6px 15px
-                rgba(150,100,20,0.20);
+                0 0 15px
+                rgba(
+                    255,
+                    215,
+                    107,
+                    0.65
+                );
         }
 
 
-        .award-image-frame {
+        .award-photo-frame {
 
-            margin-top: 20px;
+            margin-top: 15px;
 
             padding: 10px;
 
             background: white;
 
-            border-radius: 12px;
+            border-radius: 8px;
+
+            max-width: 72vw;
+
+            max-height: 57vh;
 
             box-shadow:
-                0 20px 55px
-                rgba(100,60,70,0.28);
-
-            max-width: 70vw;
-
-            max-height: 58vh;
+                0 0 35px
+                rgba(
+                    255,
+                    219,
+                    120,
+                    0.5
+                ),
+                0 30px 80px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.65
+                );
 
             animation:
                 awardPhotoPop
-                1.1s
-                cubic-bezier(
-                    0.18,
-                    0.89,
-                    0.32,
-                    1.28
-                );
+                1s
+                ease-out;
         }
 
 
-        #awardImage {
+        #awardPhoto {
 
             display: block;
 
+            width: auto;
+
+            height: auto;
+
             max-width: 100%;
 
-            max-height: 55vh;
+            max-height: 53vh;
 
             object-fit: contain;
 
-            border-radius: 5px;
+            border-radius: 3px;
         }
 
 
         .award-nickname {
 
-            margin-top: 18px;
+            margin-top: 16px;
 
             font-size:
                 clamp(
                     25px,
-                    3.5vw,
+                    3.3vw,
                     48px
                 );
 
-            font-weight: bold;
+            font-weight: 700;
 
-            color: #d76f91;
+            color: white;
         }
 
 
         .award-congratulations {
 
-            margin-top: 8px;
+            margin-top: 6px;
 
             font-size:
                 clamp(
-                    18px,
-                    2.2vw,
-                    30px
+                    17px,
+                    2vw,
+                    28px
                 );
+
+            letter-spacing: 6px;
 
             font-weight: bold;
 
-            letter-spacing: 3px;
+            color: #ffd76b;
+        }
 
-            color: #7d6b70;
+
+        .award-cracker {
+
+            position: fixed;
+
+            z-index: 70;
+
+            top: 48%;
+
+            font-size:
+                clamp(
+                    75px,
+                    9vw,
+                    140px
+                );
+
+            opacity: 0;
+
+            pointer-events: none;
+        }
+
+
+        .award-cracker-left {
+
+            left: 2vw;
+        }
+
+
+        .award-cracker-right {
+
+            right: 2vw;
+
+            transform:
+                scaleX(-1);
+        }
+
+
+        .award-cracker-left.fire {
+
+            animation:
+                crackerLeft
+                1.6s
+                ease-out
+                forwards;
+        }
+
+
+        .award-cracker-right.fire {
+
+            animation:
+                crackerRight
+                1.6s
+                ease-out
+                forwards;
         }
 
 
@@ -320,19 +958,108 @@ function addAwardStyles() {
 
             position: fixed;
 
-            z-index: 1000000;
+            z-index: 1000002;
 
             pointer-events: none;
 
+            opacity: 0;
+
             animation:
-                awardSparkle
-                1.7s
+                sparkleFly
+                2.3s
                 ease-out
                 forwards;
         }
 
 
-        @keyframes awardFadeIn {
+        .award-confetti {
+
+            position: fixed;
+
+            z-index: 1000001;
+
+            width: 9px;
+
+            height: 16px;
+
+            border-radius: 2px;
+
+            pointer-events: none;
+
+            animation:
+                confettiFly
+                2.8s
+                ease-out
+                forwards;
+        }
+
+
+        #awardSoundButton {
+
+            position: fixed;
+
+            top: 14px;
+
+            right: 14px;
+
+            z-index: 1000003;
+
+            padding:
+                11px
+                18px;
+
+            border: none;
+
+            border-radius: 30px;
+
+            background:
+                rgba(
+                    20,
+                    20,
+                    20,
+                    0.82
+                );
+
+            color: white;
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 4px 18px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.28
+                );
+        }
+
+
+        #awardSoundButton:disabled {
+
+            cursor: wait;
+
+            opacity: 0.8;
+        }
+
+
+        #awardSoundButton.sound-on {
+
+            background:
+                rgba(
+                    42,
+                    130,
+                    70,
+                    0.92
+                );
+        }
+
+
+        @keyframes awardBlackout {
 
             from {
                 opacity: 0;
@@ -340,6 +1067,292 @@ function addAwardStyles() {
 
             to {
                 opacity: 1;
+            }
+        }
+
+
+        @keyframes awardLightLeft {
+
+            0% {
+
+                opacity: 0.35;
+
+                transform:
+                    rotate(-28deg);
+            }
+
+            100% {
+
+                opacity: 0.70;
+
+                transform:
+                    rotate(30deg);
+            }
+        }
+
+
+        @keyframes awardLightRight {
+
+            0% {
+
+                opacity: 0.35;
+
+                transform:
+                    rotate(28deg);
+            }
+
+            100% {
+
+                opacity: 0.70;
+
+                transform:
+                    rotate(-30deg);
+            }
+        }
+
+
+        @keyframes awardIntroIn {
+
+            from {
+
+                opacity: 0;
+
+                transform:
+                    translateY(20px);
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+            }
+        }
+
+
+        @keyframes awardWaitingPulse {
+
+            0%,
+            100% {
+
+                opacity: 0.5;
+
+                transform:
+                    scale(0.98);
+            }
+
+            50% {
+
+                opacity: 1;
+
+                transform:
+                    scale(1.02);
+            }
+        }
+
+
+        @keyframes awardWinnerIn {
+
+            0% {
+
+                opacity: 0;
+
+                transform:
+                    scale(0.72);
+            }
+
+            70% {
+
+                opacity: 1;
+
+                transform:
+                    scale(1.04);
+            }
+
+            100% {
+
+                opacity: 1;
+
+                transform:
+                    scale(1);
+            }
+        }
+
+
+        @keyframes awardTrophy {
+
+            0% {
+
+                transform:
+                    scale(0)
+                    rotate(-20deg);
+            }
+
+            70% {
+
+                transform:
+                    scale(1.3)
+                    rotate(8deg);
+            }
+
+            100% {
+
+                transform:
+                    scale(1)
+                    rotate(0);
+            }
+        }
+
+
+        @keyframes awardPhotoPop {
+
+            from {
+
+                transform:
+                    scale(0.55)
+                    rotate(-3deg);
+
+                opacity: 0;
+            }
+
+            to {
+
+                transform:
+                    scale(1)
+                    rotate(0);
+
+                opacity: 1;
+            }
+        }
+
+
+        @keyframes crackerLeft {
+
+            0% {
+
+                opacity: 0;
+
+                transform:
+                    scale(0.2)
+                    rotate(35deg);
+            }
+
+            20% {
+
+                opacity: 1;
+
+                transform:
+                    scale(1.3)
+                    rotate(25deg);
+            }
+
+            100% {
+
+                opacity: 0;
+
+                transform:
+                    translate(
+                        35px,
+                        -40px
+                    )
+                    scale(1)
+                    rotate(15deg);
+            }
+        }
+
+
+        @keyframes crackerRight {
+
+            0% {
+
+                opacity: 0;
+
+                transform:
+                    scaleX(-1)
+                    scale(0.2)
+                    rotate(35deg);
+            }
+
+            20% {
+
+                opacity: 1;
+
+                transform:
+                    scaleX(-1)
+                    scale(1.3)
+                    rotate(25deg);
+            }
+
+            100% {
+
+                opacity: 0;
+
+                transform:
+                    translate(
+                        -35px,
+                        -40px
+                    )
+                    scaleX(-1)
+                    scale(1)
+                    rotate(15deg);
+            }
+        }
+
+
+        @keyframes sparkleFly {
+
+            0% {
+
+                opacity: 0;
+
+                transform:
+                    scale(0)
+                    rotate(0deg);
+            }
+
+            25% {
+
+                opacity: 1;
+
+                transform:
+                    scale(1.4)
+                    rotate(80deg);
+            }
+
+            100% {
+
+                opacity: 0;
+
+                transform:
+                    translateY(-100px)
+                    scale(0.2)
+                    rotate(200deg);
+            }
+        }
+
+
+        @keyframes confettiFly {
+
+            0% {
+
+                opacity: 1;
+
+                transform:
+                    translate(0,0)
+                    rotate(0deg);
+            }
+
+            100% {
+
+                opacity: 0;
+
+                transform:
+                    translate(
+                        var(--x),
+                        var(--y)
+                    )
+                    rotate(600deg);
             }
         }
 
@@ -356,101 +1369,19 @@ function addAwardStyles() {
         }
 
 
-        @keyframes trophyPop {
-
-            0% {
-                transform:
-                    scale(0)
-                    rotate(-30deg);
-            }
-
-            70% {
-                transform:
-                    scale(1.25)
-                    rotate(10deg);
-            }
-
-            100% {
-                transform:
-                    scale(1)
-                    rotate(0);
-            }
-        }
-
-
-        @keyframes awardPhotoPop {
-
-            0% {
-
-                opacity: 0;
-
-                transform:
-                    scale(0.3)
-                    rotate(-8deg);
-            }
-
-            70% {
-
-                opacity: 1;
-
-                transform:
-                    scale(1.05)
-                    rotate(2deg);
-            }
-
-            100% {
-
-                opacity: 1;
-
-                transform:
-                    scale(1)
-                    rotate(0);
-            }
-        }
-
-
-        @keyframes awardSparkle {
-
-            0% {
-
-                opacity: 0;
-
-                transform:
-                    scale(0)
-                    rotate(0deg);
-            }
-
-            20% {
-
-                opacity: 1;
-
-                transform:
-                    scale(1.4)
-                    rotate(70deg);
-            }
-
-            100% {
-
-                opacity: 0;
-
-                transform:
-                    translateY(-80px)
-                    scale(0.2)
-                    rotate(180deg);
-            }
-        }
-
-
         @media (
-            max-width: 600px
+            max-width: 700px
         ) {
 
-            .award-image-frame {
-                max-width: 85vw;
+            .award-photo-frame {
+
+                max-width: 84vw;
             }
 
-            #awardImage {
-                max-height: 50vh;
+
+            #awardPhoto {
+
+                max-height: 48vh;
             }
         }
 
@@ -463,25 +1394,228 @@ function addAwardStyles() {
 }
 
 
-/* ========================================
+/* =========================================================
+   音声ONボタン
+========================================================= */
+
+function createSoundButton() {
+
+    if (
+        document.getElementById(
+            "awardSoundButton"
+        )
+    ) {
+        return;
+    }
+
+
+    const button =
+        document.createElement(
+            "button"
+        );
+
+
+    button.id =
+        "awardSoundButton";
+
+
+    button.type =
+        "button";
+
+
+    button.textContent =
+        "🔊 発表音声を有効にする";
+
+
+    button.addEventListener(
+        "click",
+        prepareAwardSound
+    );
+
+
+    document.body.appendChild(
+        button
+    );
+}
+
+
+/* =========================================================
+   音声準備
+========================================================= */
+
+async function prepareAwardSound() {
+
+    if (
+        soundPreparing
+    ) {
+        return;
+    }
+
+
+    const button =
+        document.getElementById(
+            "awardSoundButton"
+        );
+
+
+    soundPreparing =
+        true;
+
+
+    soundReady =
+        false;
+
+
+    button.disabled =
+        true;
+
+
+    button.classList.remove(
+        "sound-on"
+    );
+
+
+    button.textContent =
+        "🔄 音声を読み込み中…";
+
+
+    try {
+
+        await Promise.all(
+            [
+                waitForAudioReady(
+                    drumrollAudio
+                ),
+
+                waitForAudioReady(
+                    applauseAudio
+                )
+            ]
+        );
+
+
+        /* -------------------------------
+           ブラウザの再生許可を取得
+        -------------------------------- */
+
+        drumrollAudio.volume =
+            0.01;
+
+
+        drumrollAudio.currentTime =
+            0;
+
+
+        await drumrollAudio.play();
+
+
+        await new Promise(
+            resolve =>
+                setTimeout(
+                    resolve,
+                    120
+                )
+        );
+
+
+        drumrollAudio.pause();
+
+        drumrollAudio.currentTime =
+            0;
+
+        drumrollAudio.volume =
+            0.9;
+
+
+
+        applauseAudio.volume =
+            0.01;
+
+
+        applauseAudio.currentTime =
+            0;
+
+
+        await applauseAudio.play();
+
+
+        await new Promise(
+            resolve =>
+                setTimeout(
+                    resolve,
+                    120
+                )
+        );
+
+
+        applauseAudio.pause();
+
+        applauseAudio.currentTime =
+            0;
+
+        applauseAudio.volume =
+            1.0;
+
+
+        soundReady =
+            true;
+
+
+        button.textContent =
+            "🔊 発表音声 ON";
+
+
+        button.classList.add(
+            "sound-on"
+        );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.log(
+            "音声準備エラー",
+            error
+        );
+
+
+        soundReady =
+            false;
+
+
+        button.textContent =
+            "🔊 もう一度押してください";
+    }
+
+
+    button.disabled =
+        false;
+
+
+    soundPreparing =
+        false;
+}
+
+
+/* =========================================================
    キラキラ
-======================================== */
+========================================================= */
 
-function createAwardSparkles() {
+function createSparkles() {
 
-    const sparkleCharacters =
+    const marks =
         [
             "✨",
             "⭐",
-            "♡",
-            "✨",
+            "💫",
             "✦"
         ];
 
 
     for (
         let i = 0;
-        i < 35;
+        i < 40;
         i++
     ) {
 
@@ -496,20 +1630,22 @@ function createAwardSparkles() {
 
 
         sparkle.textContent =
-            sparkleCharacters[
+            marks[
                 Math.floor(
                     Math.random()
                     *
-                    sparkleCharacters.length
+                    marks.length
                 )
             ];
 
 
         sparkle.style.left =
             (
+                8
+                +
                 Math.random()
                 *
-                100
+                84
             )
             +
             "vw";
@@ -517,11 +1653,11 @@ function createAwardSparkles() {
 
         sparkle.style.top =
             (
-                20
+                12
                 +
                 Math.random()
                 *
-                75
+                72
             )
             +
             "vh";
@@ -529,11 +1665,11 @@ function createAwardSparkles() {
 
         sparkle.style.fontSize =
             (
-                15
+                16
                 +
                 Math.random()
                 *
-                30
+                32
             )
             +
             "px";
@@ -560,19 +1696,210 @@ function createAwardSparkles() {
                 sparkle.remove();
 
             },
-            2500
+            3200
         );
     }
 }
 
 
-/* ========================================
-   受賞写真を表示
-======================================== */
+/* =========================================================
+   紙吹雪
+========================================================= */
 
-function showAward(photo) {
+function createConfetti() {
 
-    createAwardOverlay();
+    const colors =
+        [
+            "#ffd86b",
+            "#ff9eb5",
+            "#ffffff",
+            "#b7e7a7",
+            "#ffbd59"
+        ];
+
+
+    for (
+        let i = 0;
+        i < 60;
+        i++
+    ) {
+
+        const confetti =
+            document.createElement(
+                "div"
+            );
+
+
+        confetti.className =
+            "award-confetti";
+
+
+        confetti.style.background =
+            colors[
+                Math.floor(
+                    Math.random()
+                    *
+                    colors.length
+                )
+            ];
+
+
+        const leftSide =
+            i % 2 === 0;
+
+
+        confetti.style.top =
+            (
+                43
+                +
+                Math.random()
+                *
+                15
+            )
+            +
+            "vh";
+
+
+        if (
+            leftSide
+        ) {
+
+            confetti.style.left =
+                "6vw";
+
+
+            confetti.style.setProperty(
+                "--x",
+                (
+                    120
+                    +
+                    Math.random()
+                    *
+                    420
+                )
+                +
+                "px"
+            );
+
+        }
+        else {
+
+            confetti.style.right =
+                "6vw";
+
+
+            confetti.style.setProperty(
+                "--x",
+                (
+                    -120
+                    -
+                    Math.random()
+                    *
+                    420
+                )
+                +
+                "px"
+            );
+        }
+
+
+        confetti.style.setProperty(
+            "--y",
+            (
+                -100
+                -
+                Math.random()
+                *
+                340
+            )
+            +
+            "px"
+        );
+
+
+        confetti.style.animationDelay =
+            (
+                Math.random()
+                *
+                0.25
+            )
+            +
+            "s";
+
+
+        document.body.appendChild(
+            confetti
+        );
+
+
+        setTimeout(
+            () => {
+
+                confetti.remove();
+
+            },
+            3300
+        );
+    }
+}
+
+
+/* =========================================================
+   クラッカー
+========================================================= */
+
+function fireCrackers() {
+
+    const left =
+        document.getElementById(
+            "awardCrackerLeft"
+        );
+
+
+    const right =
+        document.getElementById(
+            "awardCrackerRight"
+        );
+
+
+    left.classList.remove(
+        "fire"
+    );
+
+
+    right.classList.remove(
+        "fire"
+    );
+
+
+    void left.offsetWidth;
+
+
+    left.classList.add(
+        "fire"
+    );
+
+
+    right.classList.add(
+        "fire"
+    );
+
+
+    createConfetti();
+
+    createSparkles();
+}
+
+
+/* =========================================================
+   発表開始
+========================================================= */
+
+async function showAward(
+    photo
+) {
+
+    clearAwardTimers();
 
 
     const overlay =
@@ -581,54 +1908,65 @@ function showAward(photo) {
         );
 
 
-    const awardTitle =
+    const intro =
         document.getElementById(
-            "awardTitle"
+            "awardIntro"
         );
 
 
-    const awardImage =
+    const winner =
         document.getElementById(
-            "awardImage"
+            "awardWinner"
         );
 
 
-    const awardNickname =
+    const awardName =
+        document.getElementById(
+            "awardName"
+        );
+
+
+    const photoElement =
+        document.getElementById(
+            "awardPhoto"
+        );
+
+
+    const nickname =
         document.getElementById(
             "awardNickname"
         );
 
 
-    /*
-       前回のdisplay:noneを完全解除
-    */
-
-    overlay.style.display = "";
-
-
     overlay.classList.remove(
-        "hide"
+        "award-fadeout"
     );
 
-    overlay.classList.remove(
+
+    winner.classList.remove(
         "show"
     );
 
 
-    /*
-       アニメーションを毎回最初から
-    */
-
-    void overlay.offsetWidth;
+    winner.style.display =
+        "none";
 
 
-    awardTitle.textContent =
+    intro.style.display =
+        "block";
+
+
+    awardName.textContent =
         photo.award
         ||
         "BEST PHOTO";
 
 
-    awardNickname.textContent =
+    photoElement.src =
+        photo.image_url;
+
+
+    nickname.textContent =
         (
             photo.nickname
             ||
@@ -638,61 +1976,107 @@ function showAward(photo) {
         " さん";
 
 
-    awardImage.style.display =
-        "block";
-
-
-    awardImage.onload =
-        () => {
-
-            awardImage.style.display =
-                "block";
-        };
-
-
-    awardImage.onerror =
-        () => {
-
-            awardImage.style.display =
-                "none";
-        };
-
-
-    awardImage.src =
-        photo.image_url;
+    overlay.style.display =
+        "flex";
 
 
     overlay.classList.add(
-        "show"
+        "award-active"
     );
 
 
-    createAwardSparkles();
+    if (
+        !soundReady
+    ) {
 
-
-    if (awardTimer) {
-
-        clearTimeout(
-            awardTimer
+        console.log(
+            "音声ONがまだ完了していません"
         );
     }
 
 
-    awardTimer =
+    await safePlay(
+        drumrollAudio,
+        "ドラムロール"
+    );
+
+
+    introTimer =
+        setTimeout(
+            () => {
+
+                revealWinner();
+
+            },
+            DRUMROLL_TIME
+        );
+}
+
+
+/* =========================================================
+   受賞発表
+========================================================= */
+
+async function revealWinner() {
+
+    const intro =
+        document.getElementById(
+            "awardIntro"
+        );
+
+
+    const winner =
+        document.getElementById(
+            "awardWinner"
+        );
+
+
+    drumrollAudio.pause();
+
+    drumrollAudio.currentTime =
+        0;
+
+
+    intro.style.display =
+        "none";
+
+
+    winner.style.display =
+        "flex";
+
+
+    void winner.offsetWidth;
+
+
+    winner.classList.add(
+        "show"
+    );
+
+
+    fireCrackers();
+
+
+    await safePlay(
+        applauseAudio,
+        "拍手・歓声"
+    );
+
+
+    hideTimer =
         setTimeout(
             () => {
 
                 hideAward();
 
             },
-            10000
+            WINNER_DISPLAY_TIME
         );
 }
 
 
-/* ========================================
+/* =========================================================
    発表終了
-======================================== */
+========================================================= */
 
 function hideAward() {
 
@@ -702,18 +2086,8 @@ function hideAward() {
         );
 
 
-    if (!overlay) {
-        return;
-    }
-
-
-    overlay.classList.remove(
-        "show"
-    );
-
-
     overlay.classList.add(
-        "hide"
+        "award-fadeout"
     );
 
 
@@ -721,29 +2095,115 @@ function hideAward() {
         () => {
 
             overlay.classList.remove(
-                "hide"
+                "award-active"
             );
 
-            /*
-               inlineのdisplay:noneは使わない
-               これで2回目以降も表示可能
-            */
+
+            overlay.classList.remove(
+                "award-fadeout"
+            );
+
+
+            overlay.style.display =
+                "none";
+
+
+            resetAward();
 
         },
-        800
+        1000
     );
 }
 
 
-/* ========================================
-   リアルタイム監視
-======================================== */
+/* =========================================================
+   リセット
+========================================================= */
+
+function resetAward() {
+
+    const intro =
+        document.getElementById(
+            "awardIntro"
+        );
+
+
+    const winner =
+        document.getElementById(
+            "awardWinner"
+        );
+
+
+    intro.style.display =
+        "block";
+
+
+    winner.style.display =
+        "none";
+
+
+    winner.classList.remove(
+        "show"
+    );
+
+
+    drumrollAudio.pause();
+
+    drumrollAudio.currentTime =
+        0;
+
+
+    applauseAudio.pause();
+
+    applauseAudio.currentTime =
+        0;
+}
+
+
+/* =========================================================
+   タイマー解除
+========================================================= */
+
+function clearAwardTimers() {
+
+    if (
+        introTimer
+    ) {
+
+        clearTimeout(
+            introTimer
+        );
+
+
+        introTimer =
+            null;
+    }
+
+
+    if (
+        hideTimer
+    ) {
+
+        clearTimeout(
+            hideTimer
+        );
+
+
+        hideTimer =
+            null;
+    }
+}
+
+
+/* =========================================================
+   Supabase Realtime
+========================================================= */
 
 function startAwardRealtime() {
 
     awardSupabase
         .channel(
-            "wedding-award-announcement"
+            "wedding-award-live"
         )
 
         .on(
@@ -770,26 +2230,37 @@ function startAwardRealtime() {
 
                 if (
                     !photo
-                    ||
-                    !photo.announced_at
                 ) {
-
                     return;
                 }
 
 
                 if (
-                    lastAnnouncement
-                    ===
-                    photo.announced_at
+                    !photo.announced_at
                 ) {
+                    return;
+                }
 
+
+                const key =
+                    photo.id
+                    +
+                    "-"
+                    +
+                    photo.announced_at;
+
+
+                if (
+                    key
+                    ===
+                    lastAnnouncement
+                ) {
                     return;
                 }
 
 
                 lastAnnouncement =
-                    photo.announced_at;
+                    key;
 
 
                 showAward(
@@ -802,7 +2273,7 @@ function startAwardRealtime() {
             status => {
 
                 console.log(
-                    "Award realtime:",
+                    "Award Realtime:",
                     status
                 );
             }
@@ -810,15 +2281,19 @@ function startAwardRealtime() {
 }
 
 
-/* ========================================
+/* =========================================================
    起動
-======================================== */
+========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
     () => {
 
-        createAwardOverlay();
+        createAwardAudio();
+
+        createAwardScreen();
+
+        createSoundButton();
 
         startAwardRealtime();
 
