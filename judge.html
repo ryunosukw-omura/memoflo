@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -8,14 +10,26 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Photo Contest Judge</title>
+    <title>
+        Photo Contest & Photo Manager
+    </title>
+
+
+    <!-- ZIP作成 -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
+    ></script>
+
 
     <style>
+
         * {
             box-sizing: border-box;
         }
 
+
         body {
+
             margin: 0;
 
             font-family:
@@ -32,225 +46,625 @@
                     #f4fff0
                 );
 
-            color: #57494e;
+            color:
+                #57494e;
         }
+
 
         .container {
+
             max-width: 1200px;
+
             margin: 0 auto;
-            padding: 24px 16px 60px;
+
+            padding:
+                24px
+                16px
+                80px;
         }
+
 
         h1 {
+
             text-align: center;
+
             margin: 0;
-            color: #d86f91;
-            font-size: 30px;
+
+            color:
+                #d86f91;
+
+            font-size:
+                30px;
         }
+
 
         .subtitle {
+
             text-align: center;
-            margin: 8px 0 24px;
-            color: #8f7e84;
+
+            margin:
+                8px 0 24px;
+
+            color:
+                #8f7e84;
         }
 
-        .login-box {
-            max-width: 420px;
-            margin: 40px auto;
-            padding: 24px;
 
-            background: white;
-            border-radius: 20px;
+
+        /* ========================================
+           ログイン
+        ======================================== */
+
+        .login-box {
+
+            max-width:
+                420px;
+
+            margin:
+                40px auto;
+
+            padding:
+                24px;
+
+            background:
+                white;
+
+            border-radius:
+                20px;
 
             box-shadow:
                 0 10px 30px
-                rgba(120, 80, 90, 0.14);
+                rgba(
+                    120,
+                    80,
+                    90,
+                    0.14
+                );
         }
 
+
         .login-box h2 {
-            text-align: center;
-            margin-top: 0;
+
+            text-align:
+                center;
+
+            margin-top:
+                0;
         }
+
 
         input,
         select,
         button {
-            width: 100%;
-            font-size: 16px;
+
+            width:
+                100%;
+
+            font-size:
+                16px;
         }
+
 
         input,
         select {
-            padding: 13px;
-            border-radius: 12px;
+
+            padding:
+                13px;
+
+            border-radius:
+                12px;
 
             border:
                 2px solid
                 #ecc5d2;
 
-            background: white;
+            background:
+                white;
         }
+
 
         button {
-            margin-top: 14px;
-            padding: 14px;
 
-            border: none;
-            border-radius: 12px;
+            margin-top:
+                12px;
 
-            background: #e8789b;
+            padding:
+                13px;
 
-            color: white;
+            border:
+                none;
 
-            font-weight: bold;
-            cursor: pointer;
+            border-radius:
+                12px;
+
+            background:
+                #e8789b;
+
+            color:
+                white;
+
+            font-weight:
+                bold;
+
+            cursor:
+                pointer;
         }
+
 
         button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+
+            opacity:
+                0.45;
+
+            cursor:
+                not-allowed;
         }
+
+
+
+        /* ========================================
+           管理エリア
+        ======================================== */
 
         #judgeArea {
             display: none;
         }
 
+
         .toolbar {
-            display: grid;
+
+            display:
+                grid;
 
             grid-template-columns:
                 1fr 1fr;
 
-            gap: 12px;
-            margin-bottom: 18px;
+            gap:
+                12px;
+
+            margin-bottom:
+                12px;
         }
 
+
         .toolbar-box {
-            background: white;
-            padding: 14px;
-            border-radius: 16px;
+
+            background:
+                white;
+
+            padding:
+                14px;
+
+            border-radius:
+                16px;
 
             box-shadow:
                 0 7px 22px
-                rgba(120, 80, 90, 0.10);
+                rgba(
+                    120,
+                    80,
+                    90,
+                    0.10
+                );
         }
+
 
         .toolbar-label {
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 6px;
+
+            font-size:
+                13px;
+
+            font-weight:
+                bold;
+
+            margin-bottom:
+                6px;
         }
 
-        #status {
-            text-align: center;
-            margin-bottom: 16px;
-            min-height: 24px;
-            font-weight: bold;
+
+
+        /* ========================================
+           写真管理バー
+        ======================================== */
+
+        .manager-box {
+
+            background:
+                white;
+
+            padding:
+                14px;
+
+            border-radius:
+                16px;
+
+            margin-bottom:
+                16px;
+
+            box-shadow:
+                0 7px 22px
+                rgba(
+                    120,
+                    80,
+                    90,
+                    0.10
+                );
         }
+
+
+        .manager-title {
+
+            font-weight:
+                bold;
+
+            margin-bottom:
+                10px;
+
+            font-size:
+                15px;
+        }
+
+
+        .selection-count {
+
+            margin-bottom:
+                10px;
+
+            color:
+                #846f76;
+
+            font-size:
+                14px;
+        }
+
+
+        .manager-buttons {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    4,
+                    1fr
+                );
+
+            gap:
+                8px;
+        }
+
+
+        .manager-buttons button {
+
+            margin:
+                0;
+        }
+
+
+        .select-all-button {
+
+            background:
+                #6c92c8;
+        }
+
+
+        .unselect-button {
+
+            background:
+                #888;
+        }
+
+
+        .download-button {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #4cae72,
+                    #36945b
+                );
+        }
+
+
+        .delete-selected-button {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #e45f67,
+                    #c9404b
+                );
+        }
+
+
+
+        /* ========================================
+           ステータス
+        ======================================== */
+
+        #status {
+
+            text-align:
+                center;
+
+            margin-bottom:
+                16px;
+
+            min-height:
+                24px;
+
+            font-weight:
+                bold;
+        }
+
 
         .success {
             color: #4d9860;
         }
 
+
         .error {
             color: #cf5961;
         }
+
 
         .loading {
             color: #bf813e;
         }
 
+
+
+        /* ========================================
+           写真一覧
+        ======================================== */
+
         .photo-grid {
-            display: grid;
+
+            display:
+                grid;
 
             grid-template-columns:
                 repeat(
                     auto-fill,
-                    minmax(220px, 1fr)
+                    minmax(
+                        220px,
+                        1fr
+                    )
                 );
 
-            gap: 16px;
+            gap:
+                16px;
         }
 
+
         .photo-card {
-            background: white;
-            border-radius: 18px;
-            overflow: hidden;
+
+            position:
+                relative;
+
+            background:
+                white;
+
+            border-radius:
+                18px;
+
+            overflow:
+                hidden;
 
             box-shadow:
                 0 8px 22px
-                rgba(100, 70, 80, 0.12);
+                rgba(
+                    100,
+                    70,
+                    80,
+                    0.12
+                );
 
             border:
-                3px solid transparent;
+                3px solid
+                transparent;
         }
 
-        .photo-card.selected {
-            border-color: #ef8cab;
+
+        .photo-card.award-selected {
+
+            border-color:
+                #ef8cab;
         }
+
+
+        .photo-card.download-selected {
+
+            outline:
+                4px solid
+                #4cae72;
+
+            outline-offset:
+                -4px;
+        }
+
+
+
+        /* ========================================
+           チェックボックス
+        ======================================== */
+
+        .photo-checkbox {
+
+            position:
+                absolute;
+
+            top:
+                10px;
+
+            left:
+                10px;
+
+            z-index:
+                20;
+
+            width:
+                34px;
+
+            height:
+                34px;
+
+            accent-color:
+                #42a567;
+
+            cursor:
+                pointer;
+
+            filter:
+                drop-shadow(
+                    0 2px 4px
+                    rgba(
+                        0,
+                        0,
+                        0,
+                        0.4
+                    )
+                );
+        }
+
+
+
+        /* ========================================
+           写真
+        ======================================== */
 
         .image-wrapper {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            background: #f3eeee;
-            overflow: hidden;
+
+            position:
+                relative;
+
+            width:
+                100%;
+
+            aspect-ratio:
+                1 / 1;
+
+            background:
+                #f3eeee;
+
+            overflow:
+                hidden;
         }
+
 
         .image-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
+
+            width:
+                100%;
+
+            height:
+                100%;
+
+            object-fit:
+                cover;
+
+            display:
+                block;
         }
+
 
         .image-error {
-            display: none;
 
-            position: absolute;
-            inset: 0;
+            display:
+                none;
 
-            align-items: center;
-            justify-content: center;
+            position:
+                absolute;
 
-            text-align: center;
+            inset:
+                0;
 
-            padding: 20px;
+            align-items:
+                center;
 
-            background: #f6f1f2;
-            color: #9a7d86;
+            justify-content:
+                center;
 
-            font-size: 14px;
-            line-height: 1.6;
+            text-align:
+                center;
+
+            padding:
+                20px;
+
+            background:
+                #f6f1f2;
+
+            color:
+                #9a7d86;
+
+            font-size:
+                14px;
+
+            line-height:
+                1.6;
         }
+
+
+
+        /* ========================================
+           写真情報
+        ======================================== */
 
         .photo-info {
-            padding: 12px;
+
+            padding:
+                12px;
         }
+
 
         .nickname {
-            font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 8px;
+
+            font-weight:
+                bold;
+
+            font-size:
+                16px;
+
+            margin-bottom:
+                8px;
         }
+
 
         .award-badge {
-            display: inline-block;
 
-            padding: 5px 9px;
+            display:
+                inline-block;
 
-            border-radius: 999px;
+            padding:
+                5px 9px;
 
-            background: #fff1b8;
-            color: #8d6b10;
+            border-radius:
+                999px;
 
-            font-size: 12px;
-            font-weight: bold;
+            background:
+                #fff1b8;
 
-            margin-bottom: 8px;
+            color:
+                #8d6b10;
+
+            font-size:
+                12px;
+
+            font-weight:
+                bold;
+
+            margin-bottom:
+                8px;
         }
 
+
+
+        /* ========================================
+           写真ボタン
+        ======================================== */
+
         .select-button {
+
             background:
                 linear-gradient(
                     135deg,
@@ -259,67 +673,161 @@
                 );
         }
 
+
         .announce-button {
+
             background:
                 linear-gradient(
                     135deg,
                     #f0b83f,
                     #e8962f
                 );
-
-            color: white;
         }
+
 
         .clear-button {
-            background: #9a8f93;
+
+            background:
+                #9a8f93;
         }
 
-        @media (max-width: 650px) {
+
+        .single-download-button {
+
+            background:
+                #4cae72;
+        }
+
+
+        .single-delete-button {
+
+            background:
+                #d8525c;
+        }
+
+
+
+        /* ========================================
+           スマホ
+        ======================================== */
+
+        @media (
+            max-width: 650px
+        ) {
+
+            .container {
+
+                padding:
+                    18px
+                    10px
+                    70px;
+            }
+
+
+            h1 {
+
+                font-size:
+                    25px;
+            }
+
 
             .toolbar {
-                grid-template-columns: 1fr;
+
+                grid-template-columns:
+                    1fr;
             }
+
+
+            .manager-buttons {
+
+                grid-template-columns:
+                    1fr 1fr;
+            }
+
 
             .photo-grid {
-                grid-template-columns:
-                    repeat(2, 1fr);
 
-                gap: 10px;
+                grid-template-columns:
+                    repeat(
+                        2,
+                        1fr
+                    );
+
+                gap:
+                    9px;
             }
+
 
             .photo-info {
-                padding: 10px;
+
+                padding:
+                    9px;
             }
+
 
             .nickname {
-                font-size: 14px;
+
+                font-size:
+                    13px;
             }
 
+
             button {
-                font-size: 14px;
-                padding: 12px 8px;
+
+                font-size:
+                    13px;
+
+                padding:
+                    11px 6px;
+            }
+
+
+            .photo-checkbox {
+
+                width:
+                    30px;
+
+                height:
+                    30px;
             }
         }
+
     </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
-    <h1>Photo Contest</h1>
+
+    <h1>
+        Photo Contest
+    </h1>
+
 
     <div class="subtitle">
-        RYUNOSUKE & MAKOTO
+        RYUNOSUKE & MAKOTO<br>
+        Photo Manager
     </div>
 
+
+
+    <!-- ========================================
+         ログイン
+    ======================================== -->
 
     <div
         id="loginBox"
         class="login-box"
     >
 
-        <h2>選考ページ</h2>
+        <h2>
+            選考・写真管理ページ
+        </h2>
+
 
         <input
             type="password"
@@ -327,25 +835,35 @@
             placeholder="暗証番号を入力"
         >
 
+
         <button
             id="loginButton"
             type="button"
         >
-            選考を開始
+            管理画面を開く
         </button>
 
     </div>
 
 
+
+    <!-- ========================================
+         管理画面
+    ======================================== -->
+
     <div id="judgeArea">
 
+
+        <!-- 賞 -->
         <div class="toolbar">
+
 
             <div class="toolbar-box">
 
                 <div class="toolbar-label">
                     選ぶ賞
                 </div>
+
 
                 <select id="awardSelect">
 
@@ -370,38 +888,116 @@
             </div>
 
 
+
             <div class="toolbar-box">
 
                 <div class="toolbar-label">
-                    操作
+                    写真一覧
                 </div>
+
 
                 <button
                     id="reloadButton"
                     type="button"
                     style="margin-top:0;"
                 >
-                    写真を更新
+                    🔄 写真を更新
                 </button>
 
             </div>
 
+
         </div>
 
 
+
+        <!-- ========================================
+             写真管理
+        ======================================== -->
+
+        <div class="manager-box">
+
+
+            <div class="manager-title">
+                写真のダウンロード・削除
+            </div>
+
+
+            <div
+                id="selectionCount"
+                class="selection-count"
+            >
+                0枚選択中
+            </div>
+
+
+            <div class="manager-buttons">
+
+
+                <button
+                    id="selectAllButton"
+                    class="select-all-button"
+                    type="button"
+                >
+                    全選択
+                </button>
+
+
+                <button
+                    id="unselectAllButton"
+                    class="unselect-button"
+                    type="button"
+                >
+                    選択解除
+                </button>
+
+
+                <button
+                    id="downloadSelectedButton"
+                    class="download-button"
+                    type="button"
+                >
+                    📥 選択写真をDL
+                </button>
+
+
+                <button
+                    id="deleteSelectedButton"
+                    class="delete-selected-button"
+                    type="button"
+                >
+                    🗑 選択写真を削除
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+
+
         <div id="status"></div>
+
 
         <div
             id="photoGrid"
             class="photo-grid"
         ></div>
 
+
     </div>
 
 </div>
 
 
+
 <script>
+
+
+// ========================================
+// Supabase
+// ========================================
 
 const SUPABASE_URL =
     "https://tnqnowlvtnrzrcydcsmi.supabase.co";
@@ -415,37 +1011,110 @@ const JUDGE_CODE =
     "0222";
 
 
+const STORAGE_BUCKET =
+    "photos";
+
+
+
+// ========================================
+// DOM
+// ========================================
+
 const loginBox =
-    document.getElementById("loginBox");
+    document.getElementById(
+        "loginBox"
+    );
+
 
 const judgeArea =
-    document.getElementById("judgeArea");
+    document.getElementById(
+        "judgeArea"
+    );
+
 
 const judgeCode =
-    document.getElementById("judgeCode");
+    document.getElementById(
+        "judgeCode"
+    );
+
 
 const loginButton =
-    document.getElementById("loginButton");
+    document.getElementById(
+        "loginButton"
+    );
+
 
 const awardSelect =
-    document.getElementById("awardSelect");
+    document.getElementById(
+        "awardSelect"
+    );
+
 
 const reloadButton =
-    document.getElementById("reloadButton");
+    document.getElementById(
+        "reloadButton"
+    );
+
 
 const photoGrid =
-    document.getElementById("photoGrid");
+    document.getElementById(
+        "photoGrid"
+    );
+
 
 const status =
-    document.getElementById("status");
+    document.getElementById(
+        "status"
+    );
 
 
-let currentPhotos = [];
+const selectionCount =
+    document.getElementById(
+        "selectionCount"
+    );
 
 
-/* =========================
-   ログイン
-========================= */
+const selectAllButton =
+    document.getElementById(
+        "selectAllButton"
+    );
+
+
+const unselectAllButton =
+    document.getElementById(
+        "unselectAllButton"
+    );
+
+
+const downloadSelectedButton =
+    document.getElementById(
+        "downloadSelectedButton"
+    );
+
+
+const deleteSelectedButton =
+    document.getElementById(
+        "deleteSelectedButton"
+    );
+
+
+
+// ========================================
+// 状態
+// ========================================
+
+let currentPhotos =
+    [];
+
+
+const selectedPhotoIds =
+    new Set();
+
+
+
+// ========================================
+// ログイン
+// ========================================
 
 loginButton.addEventListener(
     "click",
@@ -453,7 +1122,8 @@ loginButton.addEventListener(
 
         if (
             judgeCode.value
-            !== JUDGE_CODE
+            !==
+            JUDGE_CODE
         ) {
 
             alert(
@@ -463,25 +1133,31 @@ loginButton.addEventListener(
             return;
         }
 
+
         loginBox.style.display =
             "none";
 
+
         judgeArea.style.display =
             "block";
+
 
         loadPhotos();
     }
 );
 
 
-/* =========================
-   写真取得
-========================= */
+
+// ========================================
+// 写真取得
+// ========================================
 
 async function loadPhotos() {
 
+
     status.className =
         "loading";
+
 
     status.textContent =
         "写真を読み込んでいます…";
@@ -489,8 +1165,10 @@ async function loadPhotos() {
 
     try {
 
+
         const response =
             await fetch(
+
                 SUPABASE_URL
                 +
                 "/rest/v1/photos"
@@ -498,8 +1176,11 @@ async function loadPhotos() {
                 "?select=id,image_url,nickname,award,created_at,announced_at"
                 +
                 "&order=created_at.desc",
+
                 {
+
                     headers: {
+
                         "apikey":
                             SUPABASE_ANON_KEY,
 
@@ -512,7 +1193,9 @@ async function loadPhotos() {
             );
 
 
-        if (!response.ok) {
+        if (
+            !response.ok
+        ) {
 
             throw new Error(
                 await response.text()
@@ -524,23 +1207,65 @@ async function loadPhotos() {
             await response.json();
 
 
+        // 存在しなくなった写真を
+        // 選択状態から外す
+        const validIds =
+            new Set(
+                currentPhotos.map(
+                    photo =>
+                        photo.id
+                )
+            );
+
+
+        [
+            ...selectedPhotoIds
+        ].forEach(
+            id => {
+
+                if (
+                    !validIds.has(
+                        id
+                    )
+                ) {
+
+                    selectedPhotoIds.delete(
+                        id
+                    );
+                }
+            }
+        );
+
+
         renderPhotos();
+
+
+        updateSelectionCount();
 
 
         status.className =
             "success";
+
 
         status.textContent =
             currentPhotos.length
             +
             "枚の写真を表示中";
 
-    } catch (error) {
 
-        console.error(error);
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            error
+        );
+
 
         status.className =
             "error";
+
 
         status.textContent =
             "写真を読み込めませんでした。";
@@ -548,11 +1273,13 @@ async function loadPhotos() {
 }
 
 
-/* =========================
-   写真表示
-========================= */
+
+// ========================================
+// 写真表示
+// ========================================
 
 function renderPhotos() {
+
 
     photoGrid.innerHTML =
         "";
@@ -561,27 +1288,115 @@ function renderPhotos() {
     currentPhotos.forEach(
         photo => {
 
+
             const card =
                 document.createElement(
                     "div"
                 );
 
+
             card.className =
                 "photo-card";
 
 
-            if (photo.award) {
+            if (
+                photo.award
+            ) {
 
                 card.classList.add(
-                    "selected"
+                    "award-selected"
                 );
             }
 
+
+            if (
+                selectedPhotoIds.has(
+                    photo.id
+                )
+            ) {
+
+                card.classList.add(
+                    "download-selected"
+                );
+            }
+
+
+
+            // ========================================
+            // チェックボックス
+            // ========================================
+
+            const checkbox =
+                document.createElement(
+                    "input"
+                );
+
+
+            checkbox.type =
+                "checkbox";
+
+
+            checkbox.className =
+                "photo-checkbox";
+
+
+            checkbox.checked =
+                selectedPhotoIds.has(
+                    photo.id
+                );
+
+
+            checkbox.addEventListener(
+                "change",
+                () => {
+
+
+                    if (
+                        checkbox.checked
+                    ) {
+
+                        selectedPhotoIds.add(
+                            photo.id
+                        );
+
+
+                        card.classList.add(
+                            "download-selected"
+                        );
+                    }
+                    else {
+
+                        selectedPhotoIds.delete(
+                            photo.id
+                        );
+
+
+                        card.classList.remove(
+                            "download-selected"
+                        );
+                    }
+
+
+                    updateSelectionCount();
+                }
+            );
+
+
+            card.appendChild(
+                checkbox
+            );
+
+
+
+            // ========================================
+            // 写真
+            // ========================================
 
             const imageWrapper =
                 document.createElement(
                     "div"
                 );
+
 
             imageWrapper.className =
                 "image-wrapper";
@@ -598,8 +1413,10 @@ function renderPhotos() {
                     "div"
                 );
 
+
             imageError.className =
                 "image-error";
+
 
             imageError.innerHTML =
                 "この画像を<br>読み込めません";
@@ -611,6 +1428,7 @@ function renderPhotos() {
                     img.style.display =
                         "block";
 
+
                     imageError.style.display =
                         "none";
                 };
@@ -621,6 +1439,7 @@ function renderPhotos() {
 
                     img.style.display =
                         "none";
+
 
                     imageError.style.display =
                         "flex";
@@ -635,15 +1454,22 @@ function renderPhotos() {
                 img
             );
 
+
             imageWrapper.appendChild(
                 imageError
             );
 
 
+
+            // ========================================
+            // 情報
+            // ========================================
+
             const info =
                 document.createElement(
                     "div"
                 );
+
 
             info.className =
                 "photo-info";
@@ -654,8 +1480,10 @@ function renderPhotos() {
                     "div"
                 );
 
+
             nickname.className =
                 "nickname";
+
 
             nickname.textContent =
                 photo.nickname
@@ -668,20 +1496,31 @@ function renderPhotos() {
             );
 
 
-            if (photo.award) {
+
+            // ========================================
+            // 受賞表示
+            // ========================================
+
+            if (
+                photo.award
+            ) {
+
 
                 const badge =
                     document.createElement(
                         "div"
                     );
 
+
                 badge.className =
                     "award-badge";
+
 
                 badge.textContent =
                     "🏆 "
                     +
                     photo.award;
+
 
                 info.appendChild(
                     badge
@@ -689,10 +1528,16 @@ function renderPhotos() {
             }
 
 
+
+            // ========================================
+            // 賞を設定
+            // ========================================
+
             const selectButton =
                 document.createElement(
                     "button"
                 );
+
 
             selectButton.className =
                 "select-button";
@@ -723,15 +1568,25 @@ function renderPhotos() {
             );
 
 
-            if (photo.award) {
+
+            // ========================================
+            // 発表・解除
+            // ========================================
+
+            if (
+                photo.award
+            ) {
+
 
                 const announceButton =
                     document.createElement(
                         "button"
                     );
 
+
                 announceButton.className =
                     "announce-button";
+
 
                 announceButton.textContent =
                     "🎉 会場で発表する";
@@ -755,16 +1610,19 @@ function renderPhotos() {
                 );
 
 
+
                 const clearButton =
                     document.createElement(
                         "button"
                     );
 
+
                 clearButton.className =
                     "clear-button";
 
+
                 clearButton.textContent =
-                    "選択を解除";
+                    "賞の選択を解除";
 
 
                 clearButton.addEventListener(
@@ -785,30 +1643,1052 @@ function renderPhotos() {
             }
 
 
+
+            // ========================================
+            // 1枚DL
+            // ========================================
+
+            const singleDownloadButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            singleDownloadButton.className =
+                "single-download-button";
+
+
+            singleDownloadButton.textContent =
+                "📥 この写真をDL";
+
+
+            singleDownloadButton.addEventListener(
+                "click",
+                () => {
+
+                    downloadSinglePhoto(
+                        photo
+                    );
+                }
+            );
+
+
+            info.appendChild(
+                singleDownloadButton
+            );
+
+
+
+            // ========================================
+            // 1枚削除
+            // ========================================
+
+            const singleDeleteButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            singleDeleteButton.className =
+                "single-delete-button";
+
+
+            singleDeleteButton.textContent =
+                "🗑 この写真を削除";
+
+
+            singleDeleteButton.addEventListener(
+                "click",
+                () => {
+
+                    deleteSinglePhoto(
+                        photo
+                    );
+                }
+            );
+
+
+            info.appendChild(
+                singleDeleteButton
+            );
+
+
+
             card.appendChild(
                 imageWrapper
             );
+
 
             card.appendChild(
                 info
             );
 
+
             photoGrid.appendChild(
                 card
             );
+
         }
     );
 }
 
 
-/* =========================
-   賞を設定
-========================= */
+
+// ========================================
+// 選択数
+// ========================================
+
+function updateSelectionCount() {
+
+
+    selectionCount.textContent =
+        selectedPhotoIds.size
+        +
+        "枚選択中";
+
+
+    downloadSelectedButton.disabled =
+        selectedPhotoIds.size
+        ===
+        0;
+
+
+    deleteSelectedButton.disabled =
+        selectedPhotoIds.size
+        ===
+        0;
+}
+
+
+
+// ========================================
+// 全選択
+// ========================================
+
+selectAllButton.addEventListener(
+    "click",
+    () => {
+
+
+        currentPhotos.forEach(
+            photo => {
+
+                selectedPhotoIds.add(
+                    photo.id
+                );
+            }
+        );
+
+
+        renderPhotos();
+
+
+        updateSelectionCount();
+    }
+);
+
+
+
+// ========================================
+// 選択解除
+// ========================================
+
+unselectAllButton.addEventListener(
+    "click",
+    () => {
+
+
+        selectedPhotoIds.clear();
+
+
+        renderPhotos();
+
+
+        updateSelectionCount();
+    }
+);
+
+
+
+// ========================================
+// URLからStorageファイル名を取得
+// ========================================
+
+function getStoragePath(
+    imageUrl
+) {
+
+
+    try {
+
+
+        const marker =
+            "/storage/v1/object/public/"
+            +
+            STORAGE_BUCKET
+            +
+            "/";
+
+
+        const index =
+            imageUrl.indexOf(
+                marker
+            );
+
+
+        if (
+            index === -1
+        ) {
+
+            return null;
+        }
+
+
+        return decodeURIComponent(
+            imageUrl.substring(
+                index
+                +
+                marker.length
+            )
+        );
+
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            error
+        );
+
+
+        return null;
+    }
+}
+
+
+
+// ========================================
+// ファイル名
+// ========================================
+
+function makeFileName(
+    photo,
+    index = 1
+) {
+
+
+    const nickname =
+        (
+            photo.nickname
+            ||
+            "guest"
+        )
+        .replace(
+            /[\\/:*?"<>|]/g,
+            "_"
+        );
+
+
+    return (
+        String(
+            index
+        ).padStart(
+            3,
+            "0"
+        )
+        +
+        "_"
+        +
+        nickname
+        +
+        ".jpg"
+    );
+}
+
+
+
+// ========================================
+// 1枚DL
+// ========================================
+
+async function downloadSinglePhoto(
+    photo
+) {
+
+
+    status.className =
+        "loading";
+
+
+    status.textContent =
+        "写真を準備しています…";
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                photo.image_url
+            );
+
+
+        if (
+            !response.ok
+        ) {
+
+            throw new Error(
+                "画像取得失敗"
+            );
+        }
+
+
+        const blob =
+            await response.blob();
+
+
+        const url =
+            URL.createObjectURL(
+                blob
+            );
+
+
+        const a =
+            document.createElement(
+                "a"
+            );
+
+
+        a.href =
+            url;
+
+
+        a.download =
+            makeFileName(
+                photo
+            );
+
+
+        document.body.appendChild(
+            a
+        );
+
+
+        a.click();
+
+
+        a.remove();
+
+
+        setTimeout(
+            () => {
+
+                URL.revokeObjectURL(
+                    url
+                );
+
+            },
+            2000
+        );
+
+
+        status.className =
+            "success";
+
+
+        status.textContent =
+            "写真をダウンロードしました。";
+
+
+    }
+    catch (
+        error
+    ) {
+
+
+        console.error(
+            error
+        );
+
+
+        status.className =
+            "error";
+
+
+        status.textContent =
+            "写真をダウンロードできませんでした。";
+    }
+}
+
+
+
+// ========================================
+// 選択写真 ZIPダウンロード
+// ========================================
+
+downloadSelectedButton.addEventListener(
+    "click",
+    downloadSelectedPhotos
+);
+
+
+async function downloadSelectedPhotos() {
+
+
+    const photos =
+        currentPhotos.filter(
+            photo =>
+                selectedPhotoIds.has(
+                    photo.id
+                )
+        );
+
+
+    if (
+        photos.length === 0
+    ) {
+
+        return;
+    }
+
+
+    if (
+        photos.length > 80
+    ) {
+
+
+        const proceed =
+            confirm(
+
+                photos.length
+                +
+                "枚選択されています。\n\n"
+                +
+                "スマホでは一度に大量の写真をZIP化すると"
+                +
+                "重くなる場合があります。\n\n"
+                +
+                "このまま続けますか？"
+            );
+
+
+        if (
+            !proceed
+        ) {
+
+            return;
+        }
+    }
+
+
+    status.className =
+        "loading";
+
+
+    status.textContent =
+        "ZIPを作成しています…";
+
+
+    downloadSelectedButton.disabled =
+        true;
+
+
+    try {
+
+
+        const zip =
+            new JSZip();
+
+
+        for (
+            let i = 0;
+            i < photos.length;
+            i++
+        ) {
+
+
+            const photo =
+                photos[i];
+
+
+            status.textContent =
+                "写真を取得中 "
+                +
+                (
+                    i + 1
+                )
+                +
+                " / "
+                +
+                photos.length;
+
+
+            const response =
+                await fetch(
+                    photo.image_url
+                );
+
+
+            if (
+                !response.ok
+            ) {
+
+                throw new Error(
+                    "画像取得失敗"
+                );
+            }
+
+
+            const blob =
+                await response.blob();
+
+
+            zip.file(
+                makeFileName(
+                    photo,
+                    i + 1
+                ),
+                blob
+            );
+        }
+
+
+        status.textContent =
+            "ZIPファイルを作成中…";
+
+
+        const zipBlob =
+            await zip.generateAsync(
+                {
+                    type:
+                        "blob",
+
+                    compression:
+                        "DEFLATE",
+
+                    compressionOptions: {
+                        level:
+                            4
+                    }
+                }
+            );
+
+
+        const url =
+            URL.createObjectURL(
+                zipBlob
+            );
+
+
+        const a =
+            document.createElement(
+                "a"
+            );
+
+
+        const now =
+            new Date();
+
+
+        const dateText =
+            now
+            .toISOString()
+            .slice(
+                0,
+                10
+            );
+
+
+        a.href =
+            url;
+
+
+        a.download =
+            "wedding_photos_"
+            +
+            dateText
+            +
+            ".zip";
+
+
+        document.body.appendChild(
+            a
+        );
+
+
+        a.click();
+
+
+        a.remove();
+
+
+        setTimeout(
+            () => {
+
+                URL.revokeObjectURL(
+                    url
+                );
+
+            },
+            5000
+        );
+
+
+        status.className =
+            "success";
+
+
+        status.textContent =
+            photos.length
+            +
+            "枚をZIPでダウンロードしました。";
+
+
+    }
+    catch (
+        error
+    ) {
+
+
+        console.error(
+            error
+        );
+
+
+        status.className =
+            "error";
+
+
+        status.textContent =
+            "ZIPを作成できませんでした。";
+    }
+
+
+    updateSelectionCount();
+}
+
+
+
+// ========================================
+// Storage画像削除
+// ========================================
+
+async function deleteStorageFile(
+    photo
+) {
+
+
+    const storagePath =
+        getStoragePath(
+            photo.image_url
+        );
+
+
+    if (
+        !storagePath
+    ) {
+
+        throw new Error(
+            "Storageファイル名を取得できません"
+        );
+    }
+
+
+    const encodedPath =
+        storagePath
+        .split("/")
+        .map(
+            part =>
+                encodeURIComponent(
+                    part
+                )
+        )
+        .join("/");
+
+
+    const response =
+        await fetch(
+
+            SUPABASE_URL
+            +
+            "/storage/v1/object/"
+            +
+            STORAGE_BUCKET
+            +
+            "/"
+            +
+            encodedPath,
+
+            {
+
+                method:
+                    "DELETE",
+
+                headers: {
+
+                    "apikey":
+                        SUPABASE_ANON_KEY,
+
+                    "Authorization":
+                        "Bearer "
+                        +
+                        SUPABASE_ANON_KEY
+                }
+            }
+        );
+
+
+    if (
+        !response.ok
+    ) {
+
+        throw new Error(
+            await response.text()
+        );
+    }
+}
+
+
+
+// ========================================
+// DB削除
+// ========================================
+
+async function deleteDatabasePhoto(
+    photoId
+) {
+
+
+    const response =
+        await fetch(
+
+            SUPABASE_URL
+            +
+            "/rest/v1/rpc/delete_photo_admin",
+
+            {
+
+                method:
+                    "POST",
+
+                headers: {
+
+                    "apikey":
+                        SUPABASE_ANON_KEY,
+
+                    "Authorization":
+                        "Bearer "
+                        +
+                        SUPABASE_ANON_KEY,
+
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body:
+                    JSON.stringify(
+                        {
+
+                            p_photo_id:
+                                photoId,
+
+                            p_code:
+                                JUDGE_CODE
+                        }
+                    )
+            }
+        );
+
+
+    if (
+        !response.ok
+    ) {
+
+        throw new Error(
+            await response.text()
+        );
+    }
+}
+
+
+
+// ========================================
+// 写真完全削除
+// ========================================
+
+async function permanentlyDeletePhoto(
+    photo
+) {
+
+
+    // 先にStorageを削除
+    await deleteStorageFile(
+        photo
+    );
+
+
+    // その後DBを削除
+    await deleteDatabasePhoto(
+        photo.id
+    );
+}
+
+
+
+// ========================================
+// 1枚削除
+// ========================================
+
+async function deleteSinglePhoto(
+    photo
+) {
+
+
+    const confirmed =
+        confirm(
+
+            "この写真を完全に削除しますか？\n\n"
+            +
+            "会場スクリーン・写真一覧・保存データから"
+            +
+            "削除されます。\n\n"
+            +
+            "この操作は元に戻せません。"
+        );
+
+
+    if (
+        !confirmed
+    ) {
+
+        return;
+    }
+
+
+    const confirmedAgain =
+        confirm(
+            "本当に削除してよろしいですか？"
+        );
+
+
+    if (
+        !confirmedAgain
+    ) {
+
+        return;
+    }
+
+
+    status.className =
+        "loading";
+
+
+    status.textContent =
+        "写真を削除しています…";
+
+
+    try {
+
+
+        await permanentlyDeletePhoto(
+            photo
+        );
+
+
+        selectedPhotoIds.delete(
+            photo.id
+        );
+
+
+        await loadPhotos();
+
+
+        status.className =
+            "success";
+
+
+        status.textContent =
+            "写真を削除しました。";
+
+
+    }
+    catch (
+        error
+    ) {
+
+
+        console.error(
+            error
+        );
+
+
+        status.className =
+            "error";
+
+
+        status.textContent =
+            "写真を削除できませんでした。";
+    }
+}
+
+
+
+// ========================================
+// 選択写真削除
+// ========================================
+
+deleteSelectedButton.addEventListener(
+    "click",
+    deleteSelectedPhotos
+);
+
+
+async function deleteSelectedPhotos() {
+
+
+    const photos =
+        currentPhotos.filter(
+            photo =>
+                selectedPhotoIds.has(
+                    photo.id
+                )
+        );
+
+
+    if (
+        photos.length === 0
+    ) {
+
+        return;
+    }
+
+
+    const confirmed =
+        confirm(
+
+            photos.length
+            +
+            "枚の写真を完全に削除しますか？\n\n"
+            +
+            "元に戻すことはできません。"
+        );
+
+
+    if (
+        !confirmed
+    ) {
+
+        return;
+    }
+
+
+    const confirmedAgain =
+        confirm(
+
+            "最終確認です。\n\n"
+            +
+            photos.length
+            +
+            "枚を本当に削除しますか？"
+        );
+
+
+    if (
+        !confirmedAgain
+    ) {
+
+        return;
+    }
+
+
+    status.className =
+        "loading";
+
+
+    deleteSelectedButton.disabled =
+        true;
+
+
+    try {
+
+
+        for (
+            let i = 0;
+            i < photos.length;
+            i++
+        ) {
+
+
+            status.textContent =
+                "削除中 "
+                +
+                (
+                    i + 1
+                )
+                +
+                " / "
+                +
+                photos.length;
+
+
+            await permanentlyDeletePhoto(
+                photos[i]
+            );
+        }
+
+
+        selectedPhotoIds.clear();
+
+
+        await loadPhotos();
+
+
+        status.className =
+            "success";
+
+
+        status.textContent =
+            photos.length
+            +
+            "枚の写真を削除しました。";
+
+
+    }
+    catch (
+        error
+    ) {
+
+
+        console.error(
+            error
+        );
+
+
+        status.className =
+            "error";
+
+
+        status.textContent =
+            "途中で削除に失敗しました。写真一覧を更新してください。";
+    }
+
+
+    updateSelectionCount();
+}
+
+
+
+// ========================================
+// 賞を設定
+// ========================================
 
 async function setAward(
     photoId,
     award
 ) {
+
 
     const label =
         award
@@ -824,7 +2704,10 @@ async function setAward(
         );
 
 
-    if (!confirmed) {
+    if (
+        !confirmed
+    ) {
+
         return;
     }
 
@@ -832,22 +2715,28 @@ async function setAward(
     status.className =
         "loading";
 
+
     status.textContent =
         "保存しています…";
 
 
     try {
 
+
         const response =
             await fetch(
+
                 SUPABASE_URL
                 +
                 "/rest/v1/rpc/set_photo_award",
+
                 {
+
                     method:
                         "POST",
 
                     headers: {
+
                         "apikey":
                             SUPABASE_ANON_KEY,
 
@@ -863,6 +2752,7 @@ async function setAward(
                     body:
                         JSON.stringify(
                             {
+
                                 p_photo_id:
                                     photoId,
 
@@ -877,7 +2767,9 @@ async function setAward(
             );
 
 
-        if (!response.ok) {
+        if (
+            !response.ok
+        ) {
 
             throw new Error(
                 await response.text()
@@ -891,19 +2783,29 @@ async function setAward(
         status.className =
             "success";
 
+
         status.textContent =
             award
             ?
             "受賞写真を保存しました。"
             :
-            "選択を解除しました。";
+            "賞の選択を解除しました。";
 
-    } catch (error) {
 
-        console.error(error);
+    }
+    catch (
+        error
+    ) {
+
+
+        console.error(
+            error
+        );
+
 
         status.className =
             "error";
+
 
         status.textContent =
             "保存できませんでした。";
@@ -911,15 +2813,17 @@ async function setAward(
 }
 
 
-/* =========================
-   会場で発表
-========================= */
+
+// ========================================
+// 会場発表
+// ========================================
 
 async function announcePhoto(
     photoId,
     award,
     nickname
 ) {
+
 
     const displayName =
         nickname
@@ -929,6 +2833,7 @@ async function announcePhoto(
 
     const confirmed =
         confirm(
+
             "「"
             +
             award
@@ -941,7 +2846,10 @@ async function announcePhoto(
         );
 
 
-    if (!confirmed) {
+    if (
+        !confirmed
+    ) {
+
         return;
     }
 
@@ -949,22 +2857,28 @@ async function announcePhoto(
     status.className =
         "loading";
 
+
     status.textContent =
         "会場へ発表しています…";
 
 
     try {
 
+
         const response =
             await fetch(
+
                 SUPABASE_URL
                 +
                 "/rest/v1/rpc/announce_photo_award",
+
                 {
+
                     method:
                         "POST",
 
                     headers: {
+
                         "apikey":
                             SUPABASE_ANON_KEY,
 
@@ -980,6 +2894,7 @@ async function announcePhoto(
                     body:
                         JSON.stringify(
                             {
+
                                 p_photo_id:
                                     photoId,
 
@@ -991,7 +2906,9 @@ async function announcePhoto(
             );
 
 
-        if (!response.ok) {
+        if (
+            !response.ok
+        ) {
 
             throw new Error(
                 await response.text()
@@ -1002,18 +2919,28 @@ async function announcePhoto(
         status.className =
             "success";
 
+
         status.textContent =
             "🎉 会場へ発表しました！";
 
 
         await loadPhotos();
 
-    } catch (error) {
 
-        console.error(error);
+    }
+    catch (
+        error
+    ) {
+
+
+        console.error(
+            error
+        );
+
 
         status.className =
             "error";
+
 
         status.textContent =
             "会場へ発表できませんでした。";
@@ -1021,16 +2948,23 @@ async function announcePhoto(
 }
 
 
-/* =========================
-   更新
-========================= */
+
+// ========================================
+// 更新
+// ========================================
 
 reloadButton.addEventListener(
     "click",
     loadPhotos
 );
 
+
+updateSelectionCount();
+
+
 </script>
 
+
 </body>
+
 </html>
