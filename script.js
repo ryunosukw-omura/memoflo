@@ -1,13 +1,12 @@
 // ========================================
 // PHOTO SHUSHU
 // Wedding Photo Wall
-//
-// 本番安定版
-// ・Supabaseには全写真を保存
-// ・スクリーン表示は最新200枚まで
-// ・新着写真は中央表示後、流れに合流
-// ・左 → 右へゆっくり流れる
+// 左 → 右
+// 最新200枚
+// 新着演出
+// 削除リアルタイム対応版
 // ========================================
+
 
 
 // ========================================
@@ -42,22 +41,20 @@ const photoWall =
 
 
 // ========================================
-// 3. 本番用設定
+// 3. 基本設定
 // ========================================
 
-// 写真が画面を横切る時間
+// 写真が画面を横切る秒数
 const FLOW_DURATION =
     31;
 
 
-// 会場スクリーンに残す最大枚数
-// Supabase内の写真は削除されません
+// 会場画面に保持する最大枚数
 const MAX_DISPLAY_PHOTOS =
     200;
 
 
-// 写真レーン
-// 上側はタイトル用に空ける
+// 写真を流す高さ
 const PHOTO_LANES = [
     34,
     46,
@@ -72,16 +69,17 @@ let lastLaneIndex =
 
 
 // ========================================
-// 4. 表示中の写真を管理
+// 4. 表示中写真
 // ========================================
 
-const displayedPhotos =
+// 古い → 新しい順で保持
+let displayedPhotos =
     [];
 
 
 
 // ========================================
-// 5. 新着写真キュー
+// 5. 新着写真
 // ========================================
 
 let newPhotoQueue =
@@ -92,12 +90,17 @@ let isSpecialPhotoPlaying =
     false;
 
 
+let currentSpecialPhotoId =
+    null;
+
+
 
 // ========================================
-// レーン選択
+// 6. レーンを選ぶ
 // ========================================
 
 function getNextLane() {
+
 
     let laneIndex;
 
@@ -113,8 +116,11 @@ function getNextLane() {
 
     }
     while (
-        laneIndex ===
+        laneIndex
+        ===
         lastLaneIndex
+        &&
+        PHOTO_LANES.length > 1
     );
 
 
@@ -130,12 +136,13 @@ function getNextLane() {
 
 
 // ========================================
-// エラー表示
+// 7. エラー表示
 // ========================================
 
 function showError(
     message
 ) {
+
 
     console.error(
         message
@@ -152,6 +159,7 @@ function showError(
         !errorBox
     ) {
 
+
         errorBox =
             document.createElement(
                 "div"
@@ -165,26 +173,34 @@ function showError(
         errorBox.style.position =
             "fixed";
 
+
         errorBox.style.left =
             "15px";
+
 
         errorBox.style.bottom =
             "15px";
 
+
         errorBox.style.padding =
             "10px 14px";
+
 
         errorBox.style.background =
             "rgba(0,0,0,0.75)";
 
+
         errorBox.style.color =
             "white";
+
 
         errorBox.style.fontSize =
             "13px";
 
+
         errorBox.style.zIndex =
             "99999";
+
 
         errorBox.style.borderRadius =
             "6px";
@@ -203,201 +219,190 @@ function showError(
 
 
 // ========================================
-// 写真の縦横比
+// 8. 表示中写真として登録
 // ========================================
 
-function getPhotoRatio(
-    photo
+function registerDisplayedPhoto(
+    photoData
 ) {
 
+
     if (
-        photo.naturalWidth > 0
-        &&
-        photo.naturalHeight > 0
+        !photoData
+        ||
+        !photoData.id
     ) {
-
-        return (
-            photo.naturalWidth
-            /
-            photo.naturalHeight
-        );
-    }
-
-
-    return 1.4;
-}
-
-
-
-// ========================================
-// 通常写真サイズ
-// ========================================
-
-function setNormalPhotoSize(
-    photo
-) {
-
-    const ratio =
-        getPhotoRatio(
-            photo
-        );
-
-
-    photo.style.objectFit =
-        "contain";
-
-
-    // 縦写真
-    if (
-        ratio < 0.9
-    ) {
-
-        const height =
-            190
-            +
-            Math.random()
-            *
-            50;
-
-
-        const width =
-            height
-            *
-            ratio;
-
-
-        photo.style.width =
-            width
-            +
-            "px";
-
-
-        photo.style.height =
-            height
-            +
-            "px";
-
 
         return;
     }
 
 
-    // 正方形に近い写真
+    const alreadyExists =
+        displayedPhotos.some(
+            item =>
+                item.id
+                ===
+                photoData.id
+        );
+
+
     if (
-        ratio < 1.15
+        alreadyExists
     ) {
 
-        const size =
-            175
+        return;
+    }
+
+
+    displayedPhotos.push(
+        {
+            id:
+                photoData.id,
+
+            image_url:
+                photoData.image_url
+        }
+    );
+
+
+    trimDisplayedPhotos();
+}
+
+
+
+// ========================================
+// 9. 200枚を超えた古い写真を外す
+// ========================================
+
+function trimDisplayedPhotos() {
+
+
+    while (
+        displayedPhotos.length
+        >
+        MAX_DISPLAY_PHOTOS
+    ) {
+
+
+        const oldest =
+            displayedPhotos.shift();
+
+
+        if (
+            !oldest
+        ) {
+
+            continue;
+        }
+
+
+        removePhotoElementsById(
+            oldest.id
+        );
+    }
+}
+
+
+
+// ========================================
+// 10. IDから写真DOMを探して消す
+// ========================================
+
+function removePhotoElementsById(
+    photoId
+) {
+
+
+    if (
+        !photoId
+    ) {
+
+        return;
+    }
+
+
+    const elements =
+        document.querySelectorAll(
+            '.photo[data-photo-id="'
             +
-            Math.random()
-            *
-            50;
-
-
-        photo.style.width =
-            size
-            +
-            "px";
-
-
-        photo.style.height =
-            (
-                size
-                /
-                ratio
+            CSS.escape(
+                String(
+                    photoId
+                )
             )
             +
-            "px";
+            '"]'
+        );
 
 
-        return;
-    }
+    elements.forEach(
+        element => {
 
-
-    // 横写真
-    const width =
-        140
-        +
-        Math.random()
-        *
-        80;
-
-
-    photo.style.width =
-        width
-        +
-        "px";
-
-
-    photo.style.height =
-        (
-            width
-            /
-            ratio
-        )
-        +
-        "px";
+            element.remove();
+        }
+    );
 }
 
 
 
 // ========================================
-// 新着写真サイズ
+// 11. 通常写真を作成
 // ========================================
 
-function setSpecialPhotoSize(
-    photo
+function createNormalPhoto(
+    photoData,
+    startDelay = 0
 ) {
-
-    const ratio =
-        getPhotoRatio(
-            photo
-        );
-
-
-    const maxWidth =
-        Math.min(
-            window.innerWidth
-            *
-            0.46,
-            460
-        );
-
-
-    const maxHeight =
-        Math.min(
-            window.innerHeight
-            *
-            0.55,
-            560
-        );
-
-
-    let width =
-        maxWidth;
-
-
-    let height =
-        width
-        /
-        ratio;
 
 
     if (
-        height >
-        maxHeight
+        !photoData
+        ||
+        !photoData.image_url
     ) {
 
-        height =
-            maxHeight;
-
-
-        width =
-            height
-            *
-            ratio;
+        return;
     }
+
+
+    const photo =
+        document.createElement(
+            "img"
+        );
+
+
+    photo.classList.add(
+        "photo"
+    );
+
+
+    // 削除時に写真を特定するID
+    if (
+        photoData.id
+    ) {
+
+        photo.dataset.photoId =
+            photoData.id;
+    }
+
+
+
+    // ========================================
+    // 写真サイズ
+    // ========================================
+
+    const width =
+        Math.random()
+        *
+        80
+        +
+        140;
+
+
+    const height =
+        width
+        *
+        0.72;
 
 
     photo.style.width =
@@ -412,87 +417,10 @@ function setSpecialPhotoSize(
         "px";
 
 
-    photo.style.objectFit =
-        "contain";
-}
 
-
-
-// ========================================
-// 表示枚数を200枚以内に保つ
-// ========================================
-
-function trimDisplayedPhotos() {
-
-    while (
-        displayedPhotos.length >
-        MAX_DISPLAY_PHOTOS
-    ) {
-
-        const oldestPhoto =
-            displayedPhotos.shift();
-
-
-        if (
-            oldestPhoto
-            &&
-            oldestPhoto.isConnected
-        ) {
-
-            oldestPhoto.remove();
-        }
-    }
-}
-
-
-
-// ========================================
-// 通常写真を登録
-// ========================================
-
-function registerDisplayedPhoto(
-    photo
-) {
-
-    if (
-        displayedPhotos.includes(
-            photo
-        )
-    ) {
-
-        return;
-    }
-
-
-    displayedPhotos.push(
-        photo
-    );
-
-
-    trimDisplayedPhotos();
-}
-
-
-
-// ========================================
-// 通常写真を作る
-// ========================================
-
-function createNormalPhoto(
-    imageURL,
-    startDelay = 0
-) {
-
-    const photo =
-        document.createElement(
-            "img"
-        );
-
-
-    photo.classList.add(
-        "photo"
-    );
-
+    // ========================================
+    // 縦位置
+    // ========================================
 
     photo.style.top =
         getNextLane()
@@ -503,6 +431,11 @@ function createNormalPhoto(
     photo.style.left =
         "-300px";
 
+
+
+    // ========================================
+    // 傾き
+    // ========================================
 
     const rotation =
         Math.random()
@@ -519,6 +452,11 @@ function createNormalPhoto(
         "deg"
     );
 
+
+
+    // ========================================
+    // 写真ごとの速度
+    // ========================================
 
     const duration =
         FLOW_DURATION
@@ -538,6 +476,11 @@ function createNormalPhoto(
     );
 
 
+
+    // ========================================
+    // 最初だけ途中から開始
+    // ========================================
+
     photo.style.animationDelay =
         "-"
         +
@@ -546,11 +489,17 @@ function createNormalPhoto(
         "s";
 
 
+
+    // ========================================
+    // 読み込み成功
+    // ========================================
+
     let started =
         false;
 
 
-    function preparePhoto() {
+    function startOnce() {
+
 
         if (
             started
@@ -564,16 +513,6 @@ function createNormalPhoto(
             true;
 
 
-        setNormalPhotoSize(
-            photo
-        );
-
-
-        registerDisplayedPhoto(
-            photo
-        );
-
-
         startFlow(
             photo
         );
@@ -582,20 +521,27 @@ function createNormalPhoto(
 
     photo.addEventListener(
         "load",
-        preparePhoto,
+        startOnce,
         {
-            once: true
+            once:
+                true
         }
     );
 
+
+
+    // ========================================
+    // 読み込み失敗
+    // ========================================
 
     photo.addEventListener(
         "error",
         function () {
 
+
             console.error(
                 "画像読み込み失敗:",
-                imageURL
+                photoData.image_url
             );
 
 
@@ -603,9 +549,11 @@ function createNormalPhoto(
 
         },
         {
-            once: true
+            once:
+                true
         }
     );
+
 
 
     photoWall.appendChild(
@@ -614,30 +562,37 @@ function createNormalPhoto(
 
 
     photo.src =
-        imageURL;
+        photoData.image_url;
 
 
+
+    // キャッシュ済み対策
     if (
         photo.complete
         &&
-        photo.naturalWidth > 0
+        photo.naturalWidth
+        >
+        0
     ) {
 
-        preparePhoto();
+        startOnce();
     }
 }
 
 
 
 // ========================================
-// 写真を流す
+// 12. 写真を流す
 // ========================================
 
 function startFlow(
     photo
 ) {
 
+
     if (
+        !photo
+        ||
         !photo.isConnected
     ) {
 
@@ -661,7 +616,7 @@ function startFlow(
 
 
 // ========================================
-// 写真の周回
+// 13. 通常写真の周回
 // ========================================
 
 photoWall.addEventListener(
@@ -670,21 +625,22 @@ photoWall.addEventListener(
         event
     ) {
 
+
         const photo =
             event.target;
 
 
         if (
-            !photo.classList.contains(
-                "photo-flow"
-            )
+            !photo.classList
+                .contains(
+                    "photo-flow"
+                )
         ) {
 
             return;
         }
 
 
-        // すでに200枚制限で削除済みなら終了
         if (
             !photo.isConnected
         ) {
@@ -693,25 +649,31 @@ photoWall.addEventListener(
         }
 
 
+
+        // クラスを一度解除
         photo.classList.remove(
             "photo-flow"
         );
 
 
+        // 2周目以降は待ち時間なし
         photo.style.animationDelay =
             "0s";
 
 
+        // 左画面外へ戻す
         photo.style.left =
             "-300px";
 
 
+        // レーンを変更
         photo.style.top =
             getNextLane()
             +
             "%";
 
 
+        // 傾きを変更
         const rotation =
             Math.random()
             *
@@ -728,6 +690,7 @@ photoWall.addEventListener(
         );
 
 
+        // 速度を少し変更
         const duration =
             FLOW_DURATION
             +
@@ -749,16 +712,16 @@ photoWall.addEventListener(
         requestAnimationFrame(
             function () {
 
+
                 requestAnimationFrame(
                     function () {
+
 
                         startFlow(
                             photo
                         );
-
                     }
                 );
-
             }
         );
     }
@@ -767,12 +730,35 @@ photoWall.addEventListener(
 
 
 // ========================================
-// 新着写真を大きく表示
+// 14. 新着写真を中央表示
 // ========================================
 
 function createSpecialPhoto(
-    imageURL
+    photoData
 ) {
+
+
+    if (
+        !photoData
+        ||
+        !photoData.image_url
+    ) {
+
+
+        isSpecialPhotoPlaying =
+            false;
+
+
+        currentSpecialPhotoId =
+            null;
+
+
+        playNextQueuedPhoto();
+
+
+        return;
+    }
+
 
     const photo =
         document.createElement(
@@ -786,6 +772,56 @@ function createSpecialPhoto(
     );
 
 
+    if (
+        photoData.id
+    ) {
+
+        photo.dataset.photoId =
+            photoData.id;
+    }
+
+
+    currentSpecialPhotoId =
+        photoData.id
+        ||
+        null;
+
+
+
+    // ========================================
+    // 新着写真最大サイズ
+    // ========================================
+
+    const maxWidth =
+        Math.min(
+            window.innerWidth
+            *
+            0.46,
+            460
+        );
+
+
+    const maxHeight =
+        Math.min(
+            window.innerHeight
+            *
+            0.55,
+            560
+        );
+
+
+    photo.style.maxWidth =
+        maxWidth
+        +
+        "px";
+
+
+    photo.style.maxHeight =
+        maxHeight
+        +
+        "px";
+
+
     photo.style.left =
         "50%";
 
@@ -794,61 +830,78 @@ function createSpecialPhoto(
         "58%";
 
 
+
     let handled =
         false;
 
 
-    function prepareSpecialPhoto() {
 
-        if (
-            handled
-        ) {
-
-            return;
-        }
-
-
-        handled =
-            true;
-
-
-        setSpecialPhotoSize(
-            photo
-        );
-
-
-        createSparkles();
-
-
-        setTimeout(
-            function () {
-
-                changeSpecialToNormal(
-                    photo
-                );
-
-            },
-            3800
-        );
-    }
-
+    // ========================================
+    // 読み込み成功
+    // ========================================
 
     photo.addEventListener(
         "load",
-        prepareSpecialPhoto,
+        function () {
+
+
+            if (
+                handled
+            ) {
+
+                return;
+            }
+
+
+            handled =
+                true;
+
+
+            createSparkles();
+
+
+            setTimeout(
+                function () {
+
+
+                    if (
+                        !photo.isConnected
+                    ) {
+
+                        return;
+                    }
+
+
+                    changeSpecialToNormal(
+                        photo,
+                        photoData
+                    );
+
+                },
+                3800
+            );
+
+        },
         {
-            once: true
+            once:
+                true
         }
     );
 
+
+
+    // ========================================
+    // 読み込み失敗
+    // ========================================
 
     photo.addEventListener(
         "error",
         function () {
 
+
             console.error(
                 "新着写真読み込み失敗:",
-                imageURL
+                photoData.image_url
             );
 
 
@@ -859,13 +912,19 @@ function createSpecialPhoto(
                 false;
 
 
+            currentSpecialPhotoId =
+                null;
+
+
             playNextQueuedPhoto();
 
         },
         {
-            once: true
+            once:
+                true
         }
     );
+
 
 
     photoWall.appendChild(
@@ -874,35 +933,74 @@ function createSpecialPhoto(
 
 
     photo.src =
-        imageURL;
+        photoData.image_url;
 
 
+
+    // キャッシュ済み画像対策
     if (
         photo.complete
         &&
-        photo.naturalWidth > 0
+        photo.naturalWidth
+        >
+        0
+        &&
+        !handled
     ) {
 
-        prepareSpecialPhoto();
+
+        handled =
+            true;
+
+
+        createSparkles();
+
+
+        setTimeout(
+            function () {
+
+
+                if (
+                    photo.isConnected
+                ) {
+
+                    changeSpecialToNormal(
+                        photo,
+                        photoData
+                    );
+                }
+
+            },
+            3800
+        );
     }
 }
 
 
 
 // ========================================
-// 新着写真 → 通常写真
+// 15. 新着写真 → 通常写真
 // ========================================
 
 function changeSpecialToNormal(
-    photo
+    photo,
+    photoData
 ) {
 
+
     if (
+        !photo
+        ||
         !photo.isConnected
     ) {
 
+
         isSpecialPhotoPlaying =
             false;
+
+
+        currentSpecialPhotoId =
+            null;
 
 
         playNextQueuedPhoto();
@@ -922,10 +1020,49 @@ function changeSpecialToNormal(
     );
 
 
-    setNormalPhotoSize(
-        photo
-    );
 
+    // ========================================
+    // 通常サイズ
+    // ========================================
+
+    const width =
+        Math.random()
+        *
+        80
+        +
+        140;
+
+
+    const height =
+        width
+        *
+        0.72;
+
+
+    photo.style.width =
+        width
+        +
+        "px";
+
+
+    photo.style.height =
+        height
+        +
+        "px";
+
+
+    photo.style.maxWidth =
+        "";
+
+
+    photo.style.maxHeight =
+        "";
+
+
+
+    // ========================================
+    // レーン
+    // ========================================
 
     photo.style.top =
         getNextLane()
@@ -936,6 +1073,11 @@ function changeSpecialToNormal(
     photo.style.left =
         "-300px";
 
+
+
+    // ========================================
+    // 傾き
+    // ========================================
 
     const rotation =
         Math.random()
@@ -952,6 +1094,11 @@ function changeSpecialToNormal(
         "deg"
     );
 
+
+
+    // ========================================
+    // 速度
+    // ========================================
 
     const duration =
         FLOW_DURATION
@@ -971,6 +1118,8 @@ function changeSpecialToNormal(
     );
 
 
+
+    // 新着アニメーション解除
     photo.style.animation =
         "";
 
@@ -979,8 +1128,10 @@ function changeSpecialToNormal(
         "0s";
 
 
+
+    // 表示中写真として登録
     registerDisplayedPhoto(
-        photo
+        photoData
     );
 
 
@@ -988,13 +1139,18 @@ function changeSpecialToNormal(
         false;
 
 
+    currentSpecialPhotoId =
+        null;
+
+
+
     requestAnimationFrame(
         function () {
+
 
             startFlow(
                 photo
             );
-
         }
     );
 
@@ -1005,16 +1161,18 @@ function changeSpecialToNormal(
 
 
 // ========================================
-// キラキラ
+// 16. キラキラ
 // ========================================
 
 function createSparkles() {
+
 
     for (
         let i = 0;
         i < 18;
         i++
     ) {
+
 
         const sparkle =
             document.createElement(
@@ -1047,9 +1205,9 @@ function createSparkles() {
                 +
                 Math.random()
                 *
-                25
+                30
                 -
-                12.5
+                15
             )
             +
             "%";
@@ -1111,6 +1269,7 @@ function createSparkles() {
         setTimeout(
             function () {
 
+
                 sparkle.remove();
 
             },
@@ -1122,15 +1281,52 @@ function createSparkles() {
 
 
 // ========================================
-// 新着写真を待機列へ
+// 17. 新着写真を待機列へ
 // ========================================
 
 function queueNewPhoto(
-    imageURL
+    photoData
 ) {
 
+
     if (
-        !imageURL
+        !photoData
+        ||
+        !photoData.id
+        ||
+        !photoData.image_url
+    ) {
+
+        return;
+    }
+
+
+    const alreadyDisplayed =
+        displayedPhotos.some(
+            item =>
+                item.id
+                ===
+                photoData.id
+        );
+
+
+    const alreadyQueued =
+        newPhotoQueue.some(
+            item =>
+                item.id
+                ===
+                photoData.id
+        );
+
+
+    if (
+        alreadyDisplayed
+        ||
+        alreadyQueued
+        ||
+        currentSpecialPhotoId
+        ===
+        photoData.id
     ) {
 
         return;
@@ -1138,7 +1334,7 @@ function queueNewPhoto(
 
 
     newPhotoQueue.push(
-        imageURL
+        photoData
     );
 
 
@@ -1148,10 +1344,11 @@ function queueNewPhoto(
 
 
 // ========================================
-// 次の新着写真
+// 18. 次の新着写真
 // ========================================
 
 function playNextQueuedPhoto() {
+
 
     if (
         isSpecialPhotoPlaying
@@ -1162,8 +1359,21 @@ function playNextQueuedPhoto() {
 
 
     if (
-        newPhotoQueue.length ===
+        newPhotoQueue.length
+        ===
         0
+    ) {
+
+        return;
+    }
+
+
+    const photoData =
+        newPhotoQueue.shift();
+
+
+    if (
+        !photoData
     ) {
 
         return;
@@ -1174,32 +1384,123 @@ function playNextQueuedPhoto() {
         true;
 
 
-    const imageURL =
-        newPhotoQueue.shift();
-
-
     createSpecialPhoto(
-        imageURL
+        photoData
     );
 }
 
 
 
 // ========================================
-// 既存写真取得
-//
-// DBには全部残す
-// スクリーンは最新200枚だけ取得
+// 19. 削除された写真を会場から消す
+// ========================================
+
+function handleDeletedPhoto(
+    deletedPhoto
+) {
+
+
+    if (
+        !deletedPhoto
+        ||
+        !deletedPhoto.id
+    ) {
+
+        return;
+    }
+
+
+    const deletedId =
+        deletedPhoto.id;
+
+
+    console.log(
+        "写真削除を検知:",
+        deletedId
+    );
+
+
+
+    // ========================================
+    // 表示中リストから削除
+    // ========================================
+
+    displayedPhotos =
+        displayedPhotos.filter(
+            item =>
+                item.id
+                !==
+                deletedId
+        );
+
+
+
+    // ========================================
+    // 新着待機列から削除
+    // ========================================
+
+    newPhotoQueue =
+        newPhotoQueue.filter(
+            item =>
+                item.id
+                !==
+                deletedId
+        );
+
+
+
+    // ========================================
+    // 現在中央表示中なら停止
+    // ========================================
+
+    if (
+        currentSpecialPhotoId
+        ===
+        deletedId
+    ) {
+
+
+        removePhotoElementsById(
+            deletedId
+        );
+
+
+        currentSpecialPhotoId =
+            null;
+
+
+        isSpecialPhotoPlaying =
+            false;
+
+
+        playNextQueuedPhoto();
+
+
+        return;
+    }
+
+
+
+    // ========================================
+    // 通常表示中写真を削除
+    // ========================================
+
+    removePhotoElementsById(
+        deletedId
+    );
+}
+
+
+
+// ========================================
+// 20. Supabaseから既存写真取得
 // ========================================
 
 async function loadExistingPhotos() {
 
+
     console.log(
-        "最新"
-        +
-        MAX_DISPLAY_PHOTOS
-        +
-        "枚まで取得します..."
+        "写真を取得しています..."
     );
 
 
@@ -1208,12 +1509,15 @@ async function loadExistingPhotos() {
         error
     } =
         await supabaseClient
+
             .from(
                 "photos"
             )
+
             .select(
                 "id, image_url, created_at"
             )
+
             .order(
                 "created_at",
                 {
@@ -1221,14 +1525,17 @@ async function loadExistingPhotos() {
                         false
                 }
             )
+
             .limit(
                 MAX_DISPLAY_PHOTOS
             );
 
 
+
     if (
         error
     ) {
+
 
         console.error(
             "Supabase写真取得エラー:",
@@ -1245,14 +1552,18 @@ async function loadExistingPhotos() {
     }
 
 
+
     if (
         !data
         ||
-        data.length === 0
+        data.length
+        ===
+        0
     ) {
 
+
         console.log(
-            "まだ写真はありません"
+            "現在写真はありません"
         );
 
 
@@ -1260,18 +1571,40 @@ async function loadExistingPhotos() {
     }
 
 
-    // Supabaseからは新しい順で取得
-    // 表示開始時は古い → 新しい順に戻す
+
+    // 新しい順で取得したものを
+    // 古い → 新しい順へ
     const photos =
-        [...data].reverse();
+        [
+            ...data
+        ].reverse();
+
+
+
+    displayedPhotos =
+        photos.map(
+            item => ({
+                id:
+                    item.id,
+
+                image_url:
+                    item.image_url
+            })
+        );
+
 
 
     console.log(
         photos.length
         +
-        "枚をスクリーンに表示します"
+        "枚の写真を表示します"
     );
 
+
+
+    // ========================================
+    // 画面全体に均等配置
+    // ========================================
 
     const total =
         photos.length;
@@ -1282,6 +1615,7 @@ async function loadExistingPhotos() {
             item,
             index
         ) {
+
 
             const startDelay =
                 (
@@ -1294,10 +1628,9 @@ async function loadExistingPhotos() {
 
 
             createNormalPhoto(
-                item.image_url,
+                item,
                 startDelay
             );
-
         }
     );
 }
@@ -1305,11 +1638,11 @@ async function loadExistingPhotos() {
 
 
 // ========================================
-// Realtime
-// 新しく投稿された写真だけ受け取る
+// 21. Realtime開始
 // ========================================
 
-function subscribeToNewPhotos() {
+function startRealtime() {
+
 
     console.log(
         "Realtime監視開始"
@@ -1317,12 +1650,21 @@ function subscribeToNewPhotos() {
 
 
     supabaseClient
+
         .channel(
             "wedding-photo-wall"
         )
+
+        // ========================================
+        // 新規投稿
+        // ========================================
+
         .on(
+
             "postgres_changes",
+
             {
+
                 event:
                     "INSERT",
 
@@ -1332,40 +1674,103 @@ function subscribeToNewPhotos() {
                 table:
                     "photos"
             },
+
             function (
                 payload
             ) {
 
+
                 if (
-                    payload.new
-                    &&
-                    payload.new.image_url
+                    !payload
+                    ||
+                    !payload.new
                 ) {
 
-                    console.log(
-                        "新着写真を受信"
-                    );
-
-
-                    queueNewPhoto(
-                        payload
-                            .new
-                            .image_url
-                    );
+                    return;
                 }
 
+
+                const newPhoto =
+                    payload.new;
+
+
+                console.log(
+                    "新着写真:",
+                    newPhoto.id
+                );
+
+
+                queueNewPhoto(
+                    {
+                        id:
+                            newPhoto.id,
+
+                        image_url:
+                            newPhoto.image_url
+                    }
+                );
             }
         )
+
+
+
+        // ========================================
+        // 管理画面から削除
+        // ========================================
+
+        .on(
+
+            "postgres_changes",
+
+            {
+
+                event:
+                    "DELETE",
+
+                schema:
+                    "public",
+
+                table:
+                    "photos"
+            },
+
+            function (
+                payload
+            ) {
+
+
+                if (
+                    !payload
+                    ||
+                    !payload.old
+                ) {
+
+                    return;
+                }
+
+
+                handleDeletedPhoto(
+                    payload.old
+                );
+            }
+        )
+
+
+
+        // ========================================
+        // 接続
+        // ========================================
+
         .subscribe(
             function (
                 status
             ) {
 
+
                 console.log(
                     "Realtime:",
                     status
                 );
-
             }
         );
 }
@@ -1373,29 +1778,17 @@ function subscribeToNewPhotos() {
 
 
 // ========================================
-// 開始
+// 22. 起動
 // ========================================
 
-async function startPhotoWall() {
-
-    if (
-        !window.supabase
-    ) {
-
-        showError(
-            "Supabaseライブラリを読み込めませんでした"
-        );
-
-
-        return;
-    }
+async function initializePhotoWall() {
 
 
     await loadExistingPhotos();
 
 
-    subscribeToNewPhotos();
+    startRealtime();
 }
 
 
-startPhotoWall();
+initializePhotoWall();
