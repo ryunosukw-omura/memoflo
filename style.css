@@ -398,11 +398,41 @@ body {
     position:
         fixed;
 
-    z-index:
-        5000;
+    left:
+        50% !important;
+
+    top:
+        58% !important;
+
+    width:
+        auto !important;
+
+    height:
+        auto !important;
+
+    max-width:
+        460px !important;
+
+    max-height:
+        55vh !important;
+
+    object-fit:
+        contain !important;
+
+    padding:
+        0;
+
+    background:
+        white;
 
     border:
         8px solid white;
+
+    border-radius:
+        3px;
+
+    z-index:
+        5000;
 
     box-shadow:
 
@@ -458,9 +488,9 @@ body {
                 -50%
             )
 
-            scale(1.15)
+            scale(1.08)
 
-            rotate(30deg);
+            rotate(20deg);
     }
 
 
@@ -473,9 +503,9 @@ body {
                 -50%
             )
 
-            scale(1.05)
+            scale(1.03)
 
-            rotate(-15deg);
+            rotate(-10deg);
     }
 
 
@@ -490,7 +520,7 @@ body {
 
             scale(1)
 
-            rotate(5deg);
+            rotate(4deg);
     }
 
 
@@ -679,5 +709,15 @@ body {
 
         padding:
             5px;
+    }
+
+
+    .photo.new-photo {
+
+        max-width:
+            78vw !important;
+
+        max-height:
+            52vh !important;
     }
 }
