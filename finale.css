@@ -1,0 +1,921 @@
+/* =========================================================
+   PHOTO SHUSHU
+   Wedding Finale
+   ハート → 星 → THANK YOU
+========================================================= */
+
+
+/* ========================================
+   フィナーレ画面全体
+======================================== */
+
+#finaleOverlay {
+
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    z-index:
+        2000000;
+
+    display:
+        none;
+
+    overflow:
+        hidden;
+
+    opacity:
+        0;
+
+    pointer-events:
+        none;
+
+    background:
+
+        radial-gradient(
+            circle at center,
+            rgba(20, 48, 105, 0.94) 0%,
+            rgba(5, 22, 62, 0.98) 58%,
+            rgba(1, 7, 24, 1) 100%
+        );
+}
+
+
+#finaleOverlay.finale-active {
+
+    display:
+        block;
+
+    opacity:
+        1;
+
+    pointer-events:
+        auto;
+
+    animation:
+
+        finaleFadeIn
+        1.2s
+        ease
+        forwards;
+}
+
+
+
+/* ========================================
+   中央の淡いゴールド光
+======================================== */
+
+.finale-glow {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    width:
+        75vw;
+
+    height:
+        75vw;
+
+    max-width:
+        1000px;
+
+    max-height:
+        1000px;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
+
+    border-radius:
+        50%;
+
+    background:
+
+        radial-gradient(
+            circle,
+            rgba(255, 220, 130, 0.20) 0%,
+            rgba(255, 210, 110, 0.07) 36%,
+            rgba(255, 210, 110, 0) 70%
+        );
+
+    animation:
+
+        finaleGlowPulse
+        3s
+        ease-in-out
+        infinite;
+}
+
+
+
+/* ========================================
+   写真ステージ
+======================================== */
+
+#finalePhotoStage {
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    z-index:
+        20;
+}
+
+
+
+/* ========================================
+   フィナーレ写真
+======================================== */
+
+.finale-photo {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    width:
+        var(
+            --pw,
+            60px
+        );
+
+    height:
+        var(
+            --ph,
+            44px
+        );
+
+    object-fit:
+        cover;
+
+    padding:
+        2px;
+
+    background:
+        white;
+
+    border-radius:
+        2px;
+
+    box-shadow:
+
+        0 0 10px
+        rgba(
+            255,
+            235,
+            180,
+            0.55
+        ),
+
+        0 5px 14px
+        rgba(
+            0,
+            0,
+            0,
+            0.35
+        );
+
+    opacity:
+        0;
+
+    transform:
+
+        translate(
+            -50%,
+            -50%
+        )
+
+        scale(0.2);
+
+    transition:
+
+        left
+        2.8s
+        cubic-bezier(
+            0.22,
+            0.61,
+            0.36,
+            1
+        ),
+
+        top
+        2.8s
+        cubic-bezier(
+            0.22,
+            0.61,
+            0.36,
+            1
+        ),
+
+        transform
+        2.8s
+        cubic-bezier(
+            0.22,
+            0.61,
+            0.36,
+            1
+        ),
+
+        opacity
+        1.2s
+        ease;
+
+    will-change:
+        left,
+        top,
+        transform,
+        opacity;
+}
+
+
+.finale-photo.visible {
+
+    opacity:
+        1;
+}
+
+
+
+/* ========================================
+   写真が中央へ集合
+======================================== */
+
+#finaleOverlay.finale-gather
+.finale-photo {
+
+    left:
+        calc(
+            50%
+            +
+            var(--gx)
+        );
+
+    top:
+        calc(
+            50%
+            +
+            var(--gy)
+        );
+
+    transform:
+
+        translate(
+            -50%,
+            -50%
+        )
+
+        rotate(
+            var(--gr)
+        )
+
+        scale(0.86);
+}
+
+
+
+/* ========================================
+   ハート
+======================================== */
+
+#finaleOverlay.finale-heart
+.finale-photo {
+
+    left:
+        var(--hx);
+
+    top:
+        var(--hy);
+
+    transform:
+
+        translate(
+            -50%,
+            -50%
+        )
+
+        rotate(0deg)
+
+        scale(1);
+}
+
+
+
+/* ========================================
+   星
+======================================== */
+
+#finaleOverlay.finale-star
+.finale-photo {
+
+    left:
+        var(--sx);
+
+    top:
+        var(--sy);
+
+    transform:
+
+        translate(
+            -50%,
+            -50%
+        )
+
+        rotate(0deg)
+
+        scale(1);
+}
+
+
+
+/* ========================================
+   写真フェードアウト
+======================================== */
+
+.finale-photo.fade {
+
+    opacity:
+        0 !important;
+}
+
+
+
+/* ========================================
+   星のキラキラ
+======================================== */
+
+.finale-sparkle {
+
+    position:
+        absolute;
+
+    z-index:
+        60;
+
+    left:
+        var(--sl);
+
+    top:
+        var(--st);
+
+    width:
+        var(--ss);
+
+    height:
+        var(--ss);
+
+    opacity:
+        0;
+
+    pointer-events:
+        none;
+
+    transform:
+
+        translate(
+            -50%,
+            -50%
+        )
+
+        rotate(45deg);
+
+    background:
+        white;
+
+    box-shadow:
+
+        0 0 8px
+        white,
+
+        0 0 20px
+        rgba(
+            255,
+            220,
+            120,
+            0.90
+        ),
+
+        0 0 32px
+        rgba(
+            255,
+            205,
+            90,
+            0.45
+        );
+
+    animation:
+
+        finaleTwinkle
+
+        var(--sd)
+
+        ease-in-out
+
+        var(--sdelay)
+
+        infinite;
+}
+
+
+.finale-sparkle::before,
+.finale-sparkle::after {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    background:
+        rgba(
+            255,
+            250,
+            230,
+            0.95
+        );
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
+}
+
+
+.finale-sparkle::before {
+
+    width:
+        1px;
+
+    height:
+        300%;
+}
+
+
+.finale-sparkle::after {
+
+    width:
+        300%;
+
+    height:
+        1px;
+}
+
+
+
+/* ========================================
+   メッセージ画面
+======================================== */
+
+.finale-message {
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    z-index:
+        100;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    text-align:
+        center;
+
+    color:
+        white;
+
+    opacity:
+        0;
+
+    transform:
+        scale(0.94);
+
+    transition:
+
+        opacity
+        1.5s
+        ease,
+
+        transform
+        1.5s
+        ease;
+
+    pointer-events:
+        none;
+
+    text-shadow:
+
+        0 3px 12px
+        rgba(
+            0,
+            0,
+            0,
+            0.55
+        ),
+
+        0 0 30px
+        rgba(
+            255,
+            220,
+            130,
+            0.28
+        );
+}
+
+
+.finale-message.show {
+
+    opacity:
+        1;
+
+    transform:
+        scale(1);
+}
+
+
+
+/* ========================================
+   THANK YOU
+======================================== */
+
+.finale-thankyou-main {
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size:
+
+        clamp(
+            58px,
+            9vw,
+            140px
+        );
+
+    letter-spacing:
+        7px;
+
+    color:
+        #fff7df;
+}
+
+
+.finale-thankyou-names {
+
+    margin-top:
+        22px;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size:
+
+        clamp(
+            27px,
+            4vw,
+            58px
+        );
+
+    letter-spacing:
+        4px;
+
+    color:
+        #ffe5a4;
+}
+
+
+.finale-divider {
+
+    width:
+
+        min(
+            360px,
+            56vw
+        );
+
+    height:
+        1px;
+
+    margin:
+
+        26px
+        auto
+        20px;
+
+    background:
+
+        linear-gradient(
+            to right,
+            transparent,
+            #ffe2a0,
+            transparent
+        );
+}
+
+
+.finale-thankyou-date {
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size:
+
+        clamp(
+            22px,
+            2.8vw,
+            38px
+        );
+
+    letter-spacing:
+        6px;
+
+    color:
+        #fff3d4;
+}
+
+
+
+/* ========================================
+   Special Thanks
+======================================== */
+
+.finale-special-title {
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-style:
+        italic;
+
+    font-size:
+
+        clamp(
+            54px,
+            8vw,
+            120px
+        );
+
+    color:
+        #ffe8b1;
+}
+
+
+.finale-special-text {
+
+    margin-top:
+        32px;
+
+    font-size:
+
+        clamp(
+            20px,
+            2.2vw,
+            34px
+        );
+
+    line-height:
+        2;
+
+    letter-spacing:
+        2px;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.96
+        );
+}
+
+
+
+/* ========================================
+   フィナーレ中は通常写真を消す
+======================================== */
+
+body.finale-running
+.wedding-title,
+
+body.finale-running
+#photoWall {
+
+    opacity:
+        0;
+
+    transition:
+
+        opacity
+        1.2s
+        ease;
+}
+
+
+
+/* ========================================
+   フェードイン
+======================================== */
+
+@keyframes finaleFadeIn {
+
+    from {
+
+        opacity:
+            0;
+    }
+
+
+    to {
+
+        opacity:
+            1;
+    }
+}
+
+
+
+/* ========================================
+   背景の光
+======================================== */
+
+@keyframes finaleGlowPulse {
+
+    0%,
+    100% {
+
+        opacity:
+            0.55;
+
+        transform:
+
+            translate(
+                -50%,
+                -50%
+            )
+
+            scale(0.94);
+    }
+
+
+    50% {
+
+        opacity:
+            1;
+
+        transform:
+
+            translate(
+                -50%,
+                -50%
+            )
+
+            scale(1.06);
+    }
+}
+
+
+
+/* ========================================
+   キラキラ
+======================================== */
+
+@keyframes finaleTwinkle {
+
+    0%,
+    100% {
+
+        opacity:
+            0;
+
+        transform:
+
+            translate(
+                -50%,
+                -50%
+            )
+
+            rotate(45deg)
+
+            scale(0.3);
+    }
+
+
+    45% {
+
+        opacity:
+            1;
+
+        transform:
+
+            translate(
+                -50%,
+                -50%
+            )
+
+            rotate(45deg)
+
+            scale(1.35);
+    }
+
+
+    65% {
+
+        opacity:
+            0.75;
+
+        transform:
+
+            translate(
+                -50%,
+                -50%
+            )
+
+            rotate(45deg)
+
+            scale(0.85);
+    }
+}
+
+
+
+/* ========================================
+   スマホ
+======================================== */
+
+@media (
+    max-width: 700px
+) {
+
+    .finale-photo {
+
+        padding:
+            1px;
+    }
+
+
+    .finale-thankyou-main {
+
+        letter-spacing:
+            3px;
+    }
+
+
+    .finale-thankyou-names {
+
+        letter-spacing:
+            2px;
+    }
+
+
+    .finale-special-text {
+
+        padding:
+            0 24px;
+
+        line-height:
+            1.75;
+    }
+}
