@@ -12,7 +12,6 @@
     box-sizing: border-box;
 }
 
-
 html,
 body {
     margin: 0;
@@ -24,7 +23,6 @@ body {
     overflow: hidden;
 }
 
-
 body {
     font-family:
         Arial,
@@ -34,7 +32,6 @@ body {
     background:
         #063ca8;
 }
-
 
 
 /* ========================================
@@ -67,7 +64,6 @@ body {
     pointer-events:
         none;
 }
-
 
 
 /* ========================================
@@ -106,7 +102,6 @@ body {
         rgba(0, 0, 0, 0.30);
 }
 
-
 .wedding-small-title {
     font-family:
         Georgia,
@@ -122,7 +117,6 @@ body {
     margin-bottom:
         8px;
 }
-
 
 .wedding-names {
     font-family:
@@ -147,7 +141,6 @@ body {
         normal;
 }
 
-
 .wedding-date {
     margin-top:
         8px;
@@ -164,7 +157,6 @@ body {
         5px;
 }
 
-
 .wedding-message {
     margin-top:
         10px;
@@ -175,7 +167,6 @@ body {
     letter-spacing:
         5px;
 }
-
 
 
 /* ========================================
@@ -217,7 +208,6 @@ body {
 }
 
 
-
 /* ========================================
    写真が流れるエリア
 ======================================== */
@@ -238,7 +228,6 @@ body {
     z-index:
         10;
 }
-
 
 
 /* ========================================
@@ -278,7 +267,6 @@ body {
 }
 
 
-
 /* ========================================
    写真 左 → 右
 ======================================== */
@@ -291,7 +279,6 @@ body {
         linear
         forwards;
 }
-
 
 @keyframes photoFlow {
 
@@ -309,12 +296,10 @@ body {
             translateY(0);
     }
 
-
     5% {
         opacity:
             1;
     }
-
 
     50% {
         opacity:
@@ -327,12 +312,10 @@ body {
             translateY(-10px);
     }
 
-
     95% {
         opacity:
             1;
     }
-
 
     100% {
         left:
@@ -348,7 +331,6 @@ body {
             translateY(0);
     }
 }
-
 
 
 /* ========================================
@@ -411,7 +393,6 @@ body {
         forwards;
 }
 
-
 @keyframes newPhotoPop {
 
     0% {
@@ -427,7 +408,6 @@ body {
             rotate(-180deg);
     }
 
-
     20% {
         opacity:
             1;
@@ -441,7 +421,6 @@ body {
             rotate(20deg);
     }
 
-
     35% {
         transform:
             translate(
@@ -452,7 +431,6 @@ body {
             rotate(-10deg);
     }
 
-
     50% {
         transform:
             translate(
@@ -462,7 +440,6 @@ body {
             scale(1)
             rotate(4deg);
     }
-
 
     75% {
         opacity:
@@ -476,7 +453,6 @@ body {
             scale(1)
             rotate(0deg);
     }
-
 
     100% {
         opacity:
@@ -493,46 +469,39 @@ body {
 }
 
 
-
 /* ========================================
-   新着写真のキラキラ
-
-   ★や黒い装飾は使わない
+   新着写真のキラキラ 最終仕上げ
 
    SILVER / WHITE / SOFT GOLD
 
-   ・銀をメイン
-   ・白い光
-   ・淡い金をアクセント
-   ・十字型の上品な輝き
+   ・シルバー中心
+   ・白
+   ・淡いゴールドを少量
+   ・丸い光の玉は出さない
+   ・細い十字型の光だけ
 ======================================== */
 
 .photo-sparkle {
     position:
         fixed;
 
-    /*
-       JS側からサイズが指定されるため
-       初期値だけ設定
-    */
     width:
         6px;
 
     height:
         6px;
 
-    /*
-       JSから
-       銀・白・金のcolorが渡される
-    */
     color:
-        #eef2f6;
+        #e3e8ee;
 
+    /*
+       丸い光を完全になくす
+    */
     background:
-        currentColor;
+        transparent !important;
 
     border-radius:
-        50%;
+        0;
 
     pointer-events:
         none;
@@ -543,31 +512,21 @@ body {
     opacity:
         0;
 
-    /*
-       中心を柔らかく光らせる
-    */
     box-shadow:
-        0 0 5px
-        currentColor,
+        none !important;
 
-        0 0 12px
-        currentColor,
-
-        0 0 24px
-        rgba(
-            255,
-            255,
-            255,
-            0.45
+    /*
+       光の輪郭だけを柔らかくする
+    */
+    filter:
+        drop-shadow(
+            0 0 3px
+            currentColor
         );
 
-    /*
-       写真の周りから
-       外へふわっと広がる
-    */
     animation:
         elegantWeddingSparkle
-        1.55s
+        1.45s
         cubic-bezier(
             0.18,
             0.75,
@@ -579,97 +538,14 @@ body {
     will-change:
         transform,
         opacity;
-
-    filter:
-        brightness(1.12);
 }
 
 
-
 /* ========================================
-   縦方向の細い光
+   キラキラ共通
 ======================================== */
 
-.photo-sparkle::before {
-    content:
-        "";
-
-    position:
-        absolute;
-
-    left:
-        50%;
-
-    top:
-        50%;
-
-    width:
-        1.5px;
-
-    height:
-        320%;
-
-    transform:
-        translate(
-            -50%,
-            -50%
-        );
-
-    border-radius:
-        999px;
-
-    background:
-        linear-gradient(
-            to bottom,
-
-            transparent
-            0%,
-
-            rgba(
-                255,
-                255,
-                255,
-                0.05
-            )
-            12%,
-
-            currentColor
-            42%,
-
-            rgba(
-                255,
-                255,
-                255,
-                1
-            )
-            50%,
-
-            currentColor
-            58%,
-
-            rgba(
-                255,
-                255,
-                255,
-                0.05
-            )
-            88%,
-
-            transparent
-            100%
-        );
-
-    box-shadow:
-        0 0 4px
-        currentColor;
-}
-
-
-
-/* ========================================
-   横方向の細い光
-======================================== */
-
+.photo-sparkle::before,
 .photo-sparkle::after {
     content:
         "";
@@ -683,11 +559,8 @@ body {
     top:
         50%;
 
-    width:
-        320%;
-
-    height:
-        1.5px;
+    border-radius:
+        999px;
 
     transform:
         translate(
@@ -695,59 +568,41 @@ body {
             -50%
         );
 
-    border-radius:
-        999px;
-
     background:
-        linear-gradient(
-            to right,
-
-            transparent
-            0%,
-
-            rgba(
-                255,
-                255,
-                255,
-                0.05
-            )
-            12%,
-
-            currentColor
-            42%,
-
-            rgba(
-                255,
-                255,
-                255,
-                1
-            )
-            50%,
-
-            currentColor
-            58%,
-
-            rgba(
-                255,
-                255,
-                255,
-                0.05
-            )
-            88%,
-
-            transparent
-            100%
-        );
+        currentColor;
 
     box-shadow:
         0 0 4px
         currentColor;
 }
+
+
+/* ========================================
+   縦の細い光
+======================================== */
+
+.photo-sparkle::before {
+    width:
+        1px;
+
+    height:
+        360%;
+}
+
+
+/* ========================================
+   横の細い光
+======================================== */
+
+.photo-sparkle::after {
+    width:
+        360%;
+
+    height:
+        1px;
+}
 /* ========================================
    上品なキラキラアニメーション
-
-   写真の周囲で
-   キラン → 少し広がる → 消える
 ======================================== */
 
 @keyframes elegantWeddingSparkle {
@@ -766,9 +621,9 @@ body {
     }
 
 
-    15% {
+    18% {
         opacity:
-            1;
+            0.95;
 
         transform:
             translate(
@@ -783,52 +638,52 @@ body {
                     0.08
                 )
             )
-            scale(1.25)
-            rotate(10deg);
+            scale(1.05)
+            rotate(8deg);
     }
 
 
-    35% {
+    45% {
         opacity:
-            1;
+            0.82;
 
         transform:
             translate(
                 calc(
                     var(--sparkle-x)
                     *
-                    0.30
+                    0.38
                 ),
                 calc(
                     var(--sparkle-y)
                     *
-                    0.30
+                    0.38
                 )
             )
-            scale(0.95)
-            rotate(22deg);
+            scale(0.82)
+            rotate(17deg);
     }
 
 
-    65% {
+    72% {
         opacity:
-            0.72;
+            0.42;
 
         transform:
             translate(
                 calc(
                     var(--sparkle-x)
                     *
-                    0.68
+                    0.72
                 ),
                 calc(
                     var(--sparkle-y)
                     *
-                    0.68
+                    0.72
                 )
             )
-            scale(0.60)
-            rotate(38deg);
+            scale(0.58)
+            rotate(25deg);
     }
 
 
@@ -841,11 +696,10 @@ body {
                 var(--sparkle-x),
                 var(--sparkle-y)
             )
-            scale(0.12)
-            rotate(55deg);
+            scale(0.25)
+            rotate(32deg);
     }
 }
-
 
 
 /* ========================================
@@ -910,5 +764,31 @@ body {
 
         max-height:
             52vh !important;
+    }
+
+
+    /*
+       スマホではキラキラを
+       少し小さく表示
+    */
+
+    .photo-sparkle {
+        filter:
+            drop-shadow(
+                0 0 2px
+                currentColor
+            );
+    }
+
+
+    .photo-sparkle::before {
+        height:
+            300%;
+    }
+
+
+    .photo-sparkle::after {
+        width:
+            300%;
     }
 }

@@ -43,17 +43,14 @@ const photoWall =
 // 3. 基本設定
 // ========================================
 
-// 写真が画面を横切る秒数
 const FLOW_DURATION =
     31;
 
 
-// 会場画面に保持する最大枚数
 const MAX_DISPLAY_PHOTOS =
     200;
 
 
-// 写真を流す高さ
 const PHOTO_LANES = [
     34,
     46,
@@ -71,7 +68,6 @@ let lastLaneIndex =
 // 4. 表示中写真
 // ========================================
 
-// 古い → 新しい順で保持
 let displayedPhotos =
     [];
 
@@ -366,7 +362,6 @@ function createNormalPhoto(
     );
 
 
-    // 削除時に写真を特定するID
     if (
         photoData.id
     ) {
@@ -376,10 +371,6 @@ function createNormalPhoto(
     }
 
 
-
-    // ========================================
-    // 写真サイズ
-    // ========================================
 
     const width =
         Math.random()
@@ -408,10 +399,6 @@ function createNormalPhoto(
 
 
 
-    // ========================================
-    // 縦位置
-    // ========================================
-
     photo.style.top =
         getNextLane()
         +
@@ -422,10 +409,6 @@ function createNormalPhoto(
         "-300px";
 
 
-
-    // ========================================
-    // 傾き
-    // ========================================
 
     const rotation =
         Math.random()
@@ -443,10 +426,6 @@ function createNormalPhoto(
     );
 
 
-
-    // ========================================
-    // 写真ごとの速度
-    // ========================================
 
     const duration =
         FLOW_DURATION
@@ -467,10 +446,6 @@ function createNormalPhoto(
 
 
 
-    // ========================================
-    // 最初だけ途中から開始
-    // ========================================
-
     photo.style.animationDelay =
         "-"
         +
@@ -479,10 +454,6 @@ function createNormalPhoto(
         "s";
 
 
-
-    // ========================================
-    // 読み込み成功
-    // ========================================
 
     let started =
         false;
@@ -518,11 +489,6 @@ function createNormalPhoto(
     );
 
 
-
-    // ========================================
-    // 読み込み失敗
-    // ========================================
-
     photo.addEventListener(
         "error",
         function () {
@@ -554,7 +520,6 @@ function createNormalPhoto(
 
 
 
-    // キャッシュ済み対策
     if (
         photo.complete
         &&
@@ -636,30 +601,25 @@ photoWall.addEventListener(
 
 
 
-        // クラスを一度解除
         photo.classList.remove(
             "photo-flow"
         );
 
 
-        // 2周目以降は待ち時間なし
         photo.style.animationDelay =
             "0s";
 
 
-        // 左画面外へ戻す
         photo.style.left =
             "-300px";
 
 
-        // レーンを変更
         photo.style.top =
             getNextLane()
             +
             "%";
 
 
-        // 傾きを変更
         const rotation =
             Math.random()
             *
@@ -676,7 +636,6 @@ photoWall.addEventListener(
         );
 
 
-        // 速度を少し変更
         const duration =
             FLOW_DURATION
             +
@@ -770,10 +729,6 @@ function createSpecialPhoto(
 
 
 
-    // ========================================
-    // 新着写真最大サイズ
-    // ========================================
-
     const maxWidth =
         Math.min(
             window.innerWidth
@@ -817,10 +772,6 @@ function createSpecialPhoto(
         false;
 
 
-
-    // ========================================
-    // 読み込み成功
-    // ========================================
 
     photo.addEventListener(
         "load",
@@ -870,10 +821,6 @@ function createSpecialPhoto(
 
 
 
-    // ========================================
-    // 読み込み失敗
-    // ========================================
-
     photo.addEventListener(
         "error",
         function () {
@@ -916,7 +863,6 @@ function createSpecialPhoto(
 
 
 
-    // キャッシュ済み画像対策
     if (
         photo.complete
         &&
@@ -996,10 +942,6 @@ function changeSpecialToNormal(
 
 
 
-    // ========================================
-    // 通常サイズ
-    // ========================================
-
     const width =
         Math.random()
         *
@@ -1035,10 +977,6 @@ function changeSpecialToNormal(
 
 
 
-    // ========================================
-    // レーン
-    // ========================================
-
     photo.style.top =
         getNextLane()
         +
@@ -1049,10 +987,6 @@ function changeSpecialToNormal(
         "-300px";
 
 
-
-    // ========================================
-    // 傾き
-    // ========================================
 
     const rotation =
         Math.random()
@@ -1070,10 +1004,6 @@ function changeSpecialToNormal(
     );
 
 
-
-    // ========================================
-    // 速度
-    // ========================================
 
     const duration =
         FLOW_DURATION
@@ -1094,7 +1024,6 @@ function changeSpecialToNormal(
 
 
 
-    // 新着アニメーション解除
     photo.style.animation =
         "";
 
@@ -1104,7 +1033,6 @@ function changeSpecialToNormal(
 
 
 
-    // 表示中写真として登録
     registerDisplayedPhoto(
         photoData
     );
@@ -1135,21 +1063,20 @@ function changeSpecialToNormal(
 
 
 // ========================================
-// 16. キラキラ
+// 16. 投稿時の上品なキラキラ
 //
-// ★ 今回の変更部分
-//
-// シルバー 50%
+// シルバー 55%
 // 白       35%
-// ゴールド 15%
+// 淡い金   10%
 //
-// 写真の周囲からキラッと広がる
+// 丸い光は使わず
+// 細い十字のキラキラだけ
 // ========================================
 
 function createSparkles() {
 
     const sparkleCount =
-        32;
+        22;
 
 
     for (
@@ -1170,90 +1097,35 @@ function createSparkles() {
 
 
 
-        // ========================================
-        // 色をランダムで選ぶ
-        // ========================================
-
         const colorRandom =
             Math.random();
 
 
-        let sparkleColor;
-        let sparkleGlow;
-
-
-
-        // シルバー 50%
         if (
-            colorRandom < 0.50
+            colorRandom
+            <
+            0.55
         ) {
 
-            sparkleColor =
-                "#dfe4ea";
+            sparkle.style.color =
+                "#e3e8ee";
 
-
-            sparkleGlow =
-                "rgba(220, 228, 238, 0.95)";
-        }
-
-
-        // 白 35%
-        else if (
-            colorRandom < 0.85
+        } else if (
+            colorRandom
+            <
+            0.90
         ) {
 
-            sparkleColor =
+            sparkle.style.color =
                 "#ffffff";
 
+        } else {
 
-            sparkleGlow =
-                "rgba(255, 255, 255, 1)";
+            sparkle.style.color =
+                "#ead59a";
         }
 
 
-        // ゴールド 15%
-        else {
-
-            sparkleColor =
-                "#f4d77d";
-
-
-            sparkleGlow =
-                "rgba(244, 215, 125, 0.95)";
-        }
-
-
-
-        /*
-           CSSの currentColor にも
-           色を渡す
-
-           これで十字の光も
-
-           ・シルバー
-           ・白
-           ・ゴールド
-
-           になります
-        */
-
-        sparkle.style.color =
-            sparkleColor;
-
-
-        sparkle.style.background =
-            sparkleColor;
-
-
-
-        // ========================================
-        // 写真の周囲から発生
-        //
-        // 新着写真中心
-        //
-        // left 50%
-        // top  58%
-        // ========================================
 
         const angle =
             Math.random()
@@ -1263,20 +1135,22 @@ function createSparkles() {
             2;
 
 
+
         const startRadiusX =
-            12
-            +
-            Math.random()
-            *
-            12;
-
-
-        const startRadiusY =
-            10
+            13
             +
             Math.random()
             *
             13;
+
+
+        const startRadiusY =
+            11
+            +
+            Math.random()
+            *
+            13;
+
 
 
         const startX =
@@ -1299,6 +1173,7 @@ function createSparkles() {
             startRadiusY;
 
 
+
         sparkle.style.left =
             startX
             +
@@ -1312,37 +1187,22 @@ function createSparkles() {
 
 
 
-        // ========================================
-        // 外側へ飛ぶ距離
-        // ========================================
-
         const distance =
-            80
+            55
             +
             Math.random()
             *
-            150;
+            100;
 
-
-        const moveX =
-            Math.cos(
-                angle
-            )
-            *
-            distance;
-
-
-        const moveY =
-            Math.sin(
-                angle
-            )
-            *
-            distance;
 
 
         sparkle.style.setProperty(
             "--sparkle-x",
-            moveX
+            Math.cos(
+                angle
+            )
+            *
+            distance
             +
             "px"
         );
@@ -1350,63 +1210,23 @@ function createSparkles() {
 
         sparkle.style.setProperty(
             "--sparkle-y",
-            moveY
+            Math.sin(
+                angle
+            )
+            *
+            distance
             +
             "px"
         );
 
 
 
-        // ========================================
-        // キラキラの大きさ
-        // ========================================
-
-        const sizeRandom =
-            Math.random();
-
-
-        let size;
-
-
-
-        // 小さい光
-        if (
-            sizeRandom < 0.55
-        ) {
-
-            size =
-                3
-                +
-                Math.random()
-                *
-                4;
-        }
-
-
-        // 中くらい
-        else if (
-            sizeRandom < 0.88
-        ) {
-
-            size =
-                7
-                +
-                Math.random()
-                *
-                5;
-        }
-
-
-        // ときどき大きな光
-        else {
-
-            size =
-                13
-                +
-                Math.random()
-                *
-                7;
-        }
+        const size =
+            3.5
+            +
+            Math.random()
+            *
+            5.5;
 
 
         sparkle.style.width =
@@ -1422,47 +1242,19 @@ function createSparkles() {
 
 
 
-        // ========================================
-        // 光のぼかし
-        // ========================================
+        sparkle.style.background =
+            "transparent";
+
 
         sparkle.style.boxShadow =
-            "0 0 "
-            +
-            (
-                5
-                +
-                size
-            )
-            +
-            "px "
-            +
-            sparkleGlow
-            +
-            ", 0 0 "
-            +
-            (
-                12
-                +
-                size
-                *
-                1.5
-            )
-            +
-            "px "
-            +
-            sparkleGlow;
+            "none";
 
 
-
-        // ========================================
-        // 出現時間を少しずつずらす
-        // ========================================
 
         const delay =
             Math.random()
             *
-            650;
+            520;
 
 
         sparkle.style.animationDelay =
@@ -1475,15 +1267,11 @@ function createSparkles() {
             "9998";
 
 
+
         photoWall.appendChild(
             sparkle
         );
 
-
-
-        // ========================================
-        // 演出終了後に削除
-        // ========================================
 
         setTimeout(
             function () {
@@ -1496,7 +1284,7 @@ function createSparkles() {
                 }
 
             },
-            1900
+            1800
             +
             delay
         );
@@ -1522,7 +1310,6 @@ function enqueueNewPhoto(
     }
 
 
-    // すでに表示中なら追加しない
     const alreadyDisplayed =
         displayedPhotos.some(
             item =>
@@ -1540,7 +1327,6 @@ function enqueueNewPhoto(
     }
 
 
-    // すでに待機列にあるなら追加しない
     const alreadyQueued =
         newPhotoQueue.some(
             item =>
@@ -1558,7 +1344,6 @@ function enqueueNewPhoto(
     }
 
 
-    // 今まさに中央表示中なら追加しない
     if (
         currentSpecialPhotoId
         ===
@@ -1687,21 +1472,12 @@ async function loadInitialPhotos() {
     }
 
 
-
-    // ========================================
-    // 古い → 新しい順にする
-    // ========================================
-
+    // 古い → 新しい順
     const photos =
         [
             ...data
         ].reverse();
 
-
-
-    // ========================================
-    // 表示中写真として登録
-    // ========================================
 
     displayedPhotos =
         photos.map(
@@ -1714,14 +1490,6 @@ async function loadInitialPhotos() {
             })
         );
 
-
-
-    // ========================================
-    // 初期写真を画面に分散配置
-    //
-    // animation-delayをマイナスにして
-    // 最初から画面全体に写真があるようにする
-    // ========================================
 
     const spacing =
         FLOW_DURATION
@@ -1883,11 +1651,6 @@ function subscribeToDeletedPhotos() {
                 );
 
 
-
-                // ========================================
-                // 表示中リストから削除
-                // ========================================
-
                 displayedPhotos =
                     displayedPhotos.filter(
                         item =>
@@ -1896,11 +1659,6 @@ function subscribeToDeletedPhotos() {
                             deletedId
                     );
 
-
-
-                // ========================================
-                // 待機列から削除
-                // ========================================
 
                 newPhotoQueue =
                     newPhotoQueue.filter(
@@ -1911,20 +1669,10 @@ function subscribeToDeletedPhotos() {
                     );
 
 
-
-                // ========================================
-                // 画面上から削除
-                // ========================================
-
                 removePhotoElementsById(
                     deletedId
                 );
 
-
-
-                // ========================================
-                // 中央表示中の写真だった場合
-                // ========================================
 
                 if (
                     currentSpecialPhotoId
@@ -1968,14 +1716,7 @@ window.addEventListener(
     "resize",
     function () {
 
-        /*
-           新着写真が表示中の場合でも
-           CSSの中央配置が維持されるため、
-           基本的には何もしなくてOK。
-
-           今後サイズ調整を追加する場合の
-           ために残しています。
-        */
+        // CSS側で中央配置を維持
 
     }
 );
@@ -1983,7 +1724,7 @@ window.addEventListener(
 
 
 // ========================================
-// 23. ページが非表示になった時
+// 23. ページ表示状態
 // ========================================
 
 document.addEventListener(
@@ -2033,26 +1774,11 @@ async function initializePhotoWall() {
     );
 
 
-
-    // ========================================
-    // 最初の写真を読み込む
-    // ========================================
-
     await loadInitialPhotos();
 
 
-
-    // ========================================
-    // 新着写真を監視
-    // ========================================
-
     subscribeToNewPhotos();
 
-
-
-    // ========================================
-    // 削除写真を監視
-    // ========================================
 
     subscribeToDeletedPhotos();
 
