@@ -8,7 +8,6 @@
 // ========================================
 
 
-
 // ========================================
 // 1. Supabase設定
 // ========================================
@@ -101,9 +100,7 @@ let currentSpecialPhotoId =
 
 function getNextLane() {
 
-
     let laneIndex;
-
 
     do {
 
@@ -143,7 +140,6 @@ function showError(
     message
 ) {
 
-
     console.error(
         message
     );
@@ -158,7 +154,6 @@ function showError(
     if (
         !errorBox
     ) {
-
 
         errorBox =
             document.createElement(
@@ -226,7 +221,6 @@ function registerDisplayedPhoto(
     photoData
 ) {
 
-
     if (
         !photoData
         ||
@@ -276,13 +270,11 @@ function registerDisplayedPhoto(
 
 function trimDisplayedPhotos() {
 
-
     while (
         displayedPhotos.length
         >
         MAX_DISPLAY_PHOTOS
     ) {
-
 
         const oldest =
             displayedPhotos.shift();
@@ -311,7 +303,6 @@ function trimDisplayedPhotos() {
 function removePhotoElementsById(
     photoId
 ) {
-
 
     if (
         !photoId
@@ -353,7 +344,6 @@ function createNormalPhoto(
     photoData,
     startDelay = 0
 ) {
-
 
     if (
         !photoData
@@ -500,7 +490,6 @@ function createNormalPhoto(
 
     function startOnce() {
 
-
         if (
             started
         ) {
@@ -537,7 +526,6 @@ function createNormalPhoto(
     photo.addEventListener(
         "error",
         function () {
-
 
             console.error(
                 "画像読み込み失敗:",
@@ -589,7 +577,6 @@ function startFlow(
     photo
 ) {
 
-
     if (
         !photo
         ||
@@ -624,7 +611,6 @@ photoWall.addEventListener(
     function (
         event
     ) {
-
 
         const photo =
             event.target;
@@ -712,10 +698,8 @@ photoWall.addEventListener(
         requestAnimationFrame(
             function () {
 
-
                 requestAnimationFrame(
                     function () {
-
 
                         startFlow(
                             photo
@@ -737,13 +721,11 @@ function createSpecialPhoto(
     photoData
 ) {
 
-
     if (
         !photoData
         ||
         !photoData.image_url
     ) {
-
 
         isSpecialPhotoPlaying =
             false;
@@ -844,7 +826,6 @@ function createSpecialPhoto(
         "load",
         function () {
 
-
             if (
                 handled
             ) {
@@ -862,7 +843,6 @@ function createSpecialPhoto(
 
             setTimeout(
                 function () {
-
 
                     if (
                         !photo.isConnected
@@ -897,7 +877,6 @@ function createSpecialPhoto(
     photo.addEventListener(
         "error",
         function () {
-
 
             console.error(
                 "新着写真読み込み失敗:",
@@ -948,7 +927,6 @@ function createSpecialPhoto(
         !handled
     ) {
 
-
         handled =
             true;
 
@@ -958,7 +936,6 @@ function createSpecialPhoto(
 
         setTimeout(
             function () {
-
 
                 if (
                     photo.isConnected
@@ -987,13 +964,11 @@ function changeSpecialToNormal(
     photoData
 ) {
 
-
     if (
         !photo
         ||
         !photo.isConnected
     ) {
-
 
         isSpecialPhotoPlaying =
             false;
@@ -1147,7 +1122,6 @@ function changeSpecialToNormal(
     requestAnimationFrame(
         function () {
 
-
             startFlow(
                 photo
             );
@@ -1162,17 +1136,27 @@ function changeSpecialToNormal(
 
 // ========================================
 // 16. キラキラ
+//
+// ★ 今回の変更部分
+//
+// シルバー 50%
+// 白       35%
+// ゴールド 15%
+//
+// 写真の周囲からキラッと広がる
 // ========================================
 
 function createSparkles() {
 
+    const sparkleCount =
+        32;
+
 
     for (
         let i = 0;
-        i < 18;
+        i < sparkleCount;
         i++
     ) {
-
 
         const sparkle =
             document.createElement(
@@ -1185,43 +1169,180 @@ function createSparkles() {
         );
 
 
-        sparkle.style.left =
-            (
-                50
-                +
-                Math.random()
-                *
-                35
-                -
-                17.5
+
+        // ========================================
+        // 色をランダムで選ぶ
+        // ========================================
+
+        const colorRandom =
+            Math.random();
+
+
+        let sparkleColor;
+        let sparkleGlow;
+
+
+
+        // シルバー 50%
+        if (
+            colorRandom < 0.50
+        ) {
+
+            sparkleColor =
+                "#dfe4ea";
+
+
+            sparkleGlow =
+                "rgba(220, 228, 238, 0.95)";
+        }
+
+
+        // 白 35%
+        else if (
+            colorRandom < 0.85
+        ) {
+
+            sparkleColor =
+                "#ffffff";
+
+
+            sparkleGlow =
+                "rgba(255, 255, 255, 1)";
+        }
+
+
+        // ゴールド 15%
+        else {
+
+            sparkleColor =
+                "#f4d77d";
+
+
+            sparkleGlow =
+                "rgba(244, 215, 125, 0.95)";
+        }
+
+
+
+        /*
+           CSSの currentColor にも
+           色を渡す
+
+           これで十字の光も
+
+           ・シルバー
+           ・白
+           ・ゴールド
+
+           になります
+        */
+
+        sparkle.style.color =
+            sparkleColor;
+
+
+        sparkle.style.background =
+            sparkleColor;
+
+
+
+        // ========================================
+        // 写真の周囲から発生
+        //
+        // 新着写真中心
+        //
+        // left 50%
+        // top  58%
+        // ========================================
+
+        const angle =
+            Math.random()
+            *
+            Math.PI
+            *
+            2;
+
+
+        const startRadiusX =
+            12
+            +
+            Math.random()
+            *
+            12;
+
+
+        const startRadiusY =
+            10
+            +
+            Math.random()
+            *
+            13;
+
+
+        const startX =
+            50
+            +
+            Math.cos(
+                angle
             )
+            *
+            startRadiusX;
+
+
+        const startY =
+            58
+            +
+            Math.sin(
+                angle
+            )
+            *
+            startRadiusY;
+
+
+        sparkle.style.left =
+            startX
             +
             "%";
 
 
         sparkle.style.top =
-            (
-                58
-                +
-                Math.random()
-                *
-                30
-                -
-                15
-            )
+            startY
             +
             "%";
 
 
+
+        // ========================================
+        // 外側へ飛ぶ距離
+        // ========================================
+
+        const distance =
+            80
+            +
+            Math.random()
+            *
+            150;
+
+
+        const moveX =
+            Math.cos(
+                angle
+            )
+            *
+            distance;
+
+
+        const moveY =
+            Math.sin(
+                angle
+            )
+            *
+            distance;
+
+
         sparkle.style.setProperty(
             "--sparkle-x",
-            (
-                Math.random()
-                *
-                300
-                -
-                150
-            )
+            moveX
             +
             "px"
         );
@@ -1229,24 +1350,63 @@ function createSparkles() {
 
         sparkle.style.setProperty(
             "--sparkle-y",
-            (
-                Math.random()
-                *
-                300
-                -
-                150
-            )
+            moveY
             +
             "px"
         );
 
 
-        const size =
-            Math.random()
-            *
-            7
-            +
-            4;
+
+        // ========================================
+        // キラキラの大きさ
+        // ========================================
+
+        const sizeRandom =
+            Math.random();
+
+
+        let size;
+
+
+
+        // 小さい光
+        if (
+            sizeRandom < 0.55
+        ) {
+
+            size =
+                3
+                +
+                Math.random()
+                *
+                4;
+        }
+
+
+        // 中くらい
+        else if (
+            sizeRandom < 0.88
+        ) {
+
+            size =
+                7
+                +
+                Math.random()
+                *
+                5;
+        }
+
+
+        // ときどき大きな光
+        else {
+
+            size =
+                13
+                +
+                Math.random()
+                *
+                7;
+        }
 
 
         sparkle.style.width =
@@ -1261,33 +1421,94 @@ function createSparkles() {
             "px";
 
 
+
+        // ========================================
+        // 光のぼかし
+        // ========================================
+
+        sparkle.style.boxShadow =
+            "0 0 "
+            +
+            (
+                5
+                +
+                size
+            )
+            +
+            "px "
+            +
+            sparkleGlow
+            +
+            ", 0 0 "
+            +
+            (
+                12
+                +
+                size
+                *
+                1.5
+            )
+            +
+            "px "
+            +
+            sparkleGlow;
+
+
+
+        // ========================================
+        // 出現時間を少しずつずらす
+        // ========================================
+
+        const delay =
+            Math.random()
+            *
+            650;
+
+
+        sparkle.style.animationDelay =
+            delay
+            +
+            "ms";
+
+
+        sparkle.style.zIndex =
+            "9998";
+
+
         photoWall.appendChild(
             sparkle
         );
 
 
+
+        // ========================================
+        // 演出終了後に削除
+        // ========================================
+
         setTimeout(
             function () {
 
+                if (
+                    sparkle.isConnected
+                ) {
 
-                sparkle.remove();
+                    sparkle.remove();
+                }
 
             },
-            1200
+            1900
+            +
+            delay
         );
     }
 }
-
-
-
 // ========================================
 // 17. 新着写真を待機列へ
 // ========================================
 
-function queueNewPhoto(
+function enqueueNewPhoto(
     photoData
 ) {
-
 
     if (
         !photoData
@@ -1301,6 +1522,7 @@ function queueNewPhoto(
     }
 
 
+    // すでに表示中なら追加しない
     const alreadyDisplayed =
         displayedPhotos.some(
             item =>
@@ -1310,6 +1532,15 @@ function queueNewPhoto(
         );
 
 
+    if (
+        alreadyDisplayed
+    ) {
+
+        return;
+    }
+
+
+    // すでに待機列にあるなら追加しない
     const alreadyQueued =
         newPhotoQueue.some(
             item =>
@@ -1320,10 +1551,15 @@ function queueNewPhoto(
 
 
     if (
-        alreadyDisplayed
-        ||
         alreadyQueued
-        ||
+    ) {
+
+        return;
+    }
+
+
+    // 今まさに中央表示中なら追加しない
+    if (
         currentSpecialPhotoId
         ===
         photoData.id
@@ -1344,11 +1580,10 @@ function queueNewPhoto(
 
 
 // ========================================
-// 18. 次の新着写真
+// 18. 待機列の次の写真を再生
 // ========================================
 
 function playNextQueuedPhoto() {
-
 
     if (
         isSpecialPhotoPlaying
@@ -1368,12 +1603,12 @@ function playNextQueuedPhoto() {
     }
 
 
-    const photoData =
+    const nextPhoto =
         newPhotoQueue.shift();
 
 
     if (
-        !photoData
+        !nextPhoto
     ) {
 
         return;
@@ -1385,139 +1620,29 @@ function playNextQueuedPhoto() {
 
 
     createSpecialPhoto(
-        photoData
+        nextPhoto
     );
 }
 
 
 
 // ========================================
-// 19. 削除された写真を会場から消す
+// 19. 初期写真取得
 // ========================================
 
-function handleDeletedPhoto(
-    deletedPhoto
-) {
-
-
-    if (
-        !deletedPhoto
-        ||
-        !deletedPhoto.id
-    ) {
-
-        return;
-    }
-
-
-    const deletedId =
-        deletedPhoto.id;
-
-
-    console.log(
-        "写真削除を検知:",
-        deletedId
-    );
-
-
-
-    // ========================================
-    // 表示中リストから削除
-    // ========================================
-
-    displayedPhotos =
-        displayedPhotos.filter(
-            item =>
-                item.id
-                !==
-                deletedId
-        );
-
-
-
-    // ========================================
-    // 新着待機列から削除
-    // ========================================
-
-    newPhotoQueue =
-        newPhotoQueue.filter(
-            item =>
-                item.id
-                !==
-                deletedId
-        );
-
-
-
-    // ========================================
-    // 現在中央表示中なら停止
-    // ========================================
-
-    if (
-        currentSpecialPhotoId
-        ===
-        deletedId
-    ) {
-
-
-        removePhotoElementsById(
-            deletedId
-        );
-
-
-        currentSpecialPhotoId =
-            null;
-
-
-        isSpecialPhotoPlaying =
-            false;
-
-
-        playNextQueuedPhoto();
-
-
-        return;
-    }
-
-
-
-    // ========================================
-    // 通常表示中写真を削除
-    // ========================================
-
-    removePhotoElementsById(
-        deletedId
-    );
-}
-
-
-
-// ========================================
-// 20. Supabaseから既存写真取得
-// ========================================
-
-async function loadExistingPhotos() {
-
-
-    console.log(
-        "写真を取得しています..."
-    );
-
+async function loadInitialPhotos() {
 
     const {
         data,
         error
     } =
         await supabaseClient
-
             .from(
                 "photos"
             )
-
             .select(
                 "id, image_url, created_at"
             )
-
             .order(
                 "created_at",
                 {
@@ -1525,32 +1650,24 @@ async function loadExistingPhotos() {
                         false
                 }
             )
-
             .limit(
                 MAX_DISPLAY_PHOTOS
             );
-
 
 
     if (
         error
     ) {
 
-
-        console.error(
-            "Supabase写真取得エラー:",
-            error
-        );
-
-
         showError(
-            "写真取得エラー：Supabase接続を確認してください"
+            "写真取得エラー: "
+            +
+            error.message
         );
 
 
         return;
     }
-
 
 
     if (
@@ -1561,9 +1678,8 @@ async function loadExistingPhotos() {
         0
     ) {
 
-
         console.log(
-            "現在写真はありません"
+            "写真はまだありません"
         );
 
 
@@ -1572,8 +1688,10 @@ async function loadExistingPhotos() {
 
 
 
-    // 新しい順で取得したものを
-    // 古い → 新しい順へ
+    // ========================================
+    // 古い → 新しい順にする
+    // ========================================
+
     const photos =
         [
             ...data
@@ -1581,90 +1699,82 @@ async function loadExistingPhotos() {
 
 
 
+    // ========================================
+    // 表示中写真として登録
+    // ========================================
+
     displayedPhotos =
         photos.map(
-            item => ({
+            photo => ({
                 id:
-                    item.id,
+                    photo.id,
 
                 image_url:
-                    item.image_url
+                    photo.image_url
             })
         );
 
 
 
-    console.log(
-        photos.length
-        +
-        "枚の写真を表示します"
-    );
-
-
-
     // ========================================
-    // 画面全体に均等配置
+    // 初期写真を画面に分散配置
+    //
+    // animation-delayをマイナスにして
+    // 最初から画面全体に写真があるようにする
     // ========================================
 
-    const total =
-        photos.length;
+    const spacing =
+        FLOW_DURATION
+        /
+        Math.max(
+            photos.length,
+            1
+        );
 
 
     photos.forEach(
         function (
-            item,
+            photo,
             index
         ) {
 
-
             const startDelay =
-                (
-                    FLOW_DURATION
-                    /
-                    total
-                )
+                index
                 *
-                index;
+                spacing;
 
 
             createNormalPhoto(
-                item,
+                photo,
                 startDelay
             );
         }
+    );
+
+
+    console.log(
+        "初期写真読み込み完了:",
+        photos.length
     );
 }
 
 
 
 // ========================================
-// 21. Realtime開始
+// 20. 新着写真リアルタイム監視
 // ========================================
 
-function startRealtime() {
-
-
-    console.log(
-        "Realtime監視開始"
-    );
-
+function subscribeToNewPhotos() {
 
     supabaseClient
-
         .channel(
-            "wedding-photo-wall"
+            "photo-wall-insert-live"
         )
 
-        // ========================================
-        // 新規投稿
-        // ========================================
-
         .on(
-
             "postgres_changes",
 
             {
-
                 event:
                     "INSERT",
 
@@ -1679,51 +1789,62 @@ function startRealtime() {
                 payload
             ) {
 
-
-                if (
-                    !payload
-                    ||
-                    !payload.new
-                ) {
-
-                    return;
-                }
-
-
                 const newPhoto =
                     payload.new;
 
 
                 console.log(
                     "新着写真:",
-                    newPhoto.id
+                    newPhoto
                 );
 
 
-                queueNewPhoto(
-                    {
-                        id:
-                            newPhoto.id,
+                if (
+                    !newPhoto
+                    ||
+                    !newPhoto.image_url
+                ) {
 
-                        image_url:
-                            newPhoto.image_url
-                    }
+                    return;
+                }
+
+
+                enqueueNewPhoto(
+                    newPhoto
                 );
             }
         )
 
+        .subscribe(
+            function (
+                status
+            ) {
+
+                console.log(
+                    "Photo INSERT Realtime:",
+                    status
+                );
+            }
+        );
+}
 
 
-        // ========================================
-        // 管理画面から削除
-        // ========================================
+
+// ========================================
+// 21. 削除写真リアルタイム監視
+// ========================================
+
+function subscribeToDeletedPhotos() {
+
+    supabaseClient
+        .channel(
+            "photo-wall-delete-live"
+        )
 
         .on(
-
             "postgres_changes",
 
             {
-
                 event:
                     "DELETE",
 
@@ -1738,37 +1859,99 @@ function startRealtime() {
                 payload
             ) {
 
+                const deletedPhoto =
+                    payload.old;
+
 
                 if (
-                    !payload
+                    !deletedPhoto
                     ||
-                    !payload.old
+                    !deletedPhoto.id
                 ) {
 
                     return;
                 }
 
 
-                handleDeletedPhoto(
-                    payload.old
+                const deletedId =
+                    deletedPhoto.id;
+
+
+                console.log(
+                    "削除写真:",
+                    deletedId
                 );
+
+
+
+                // ========================================
+                // 表示中リストから削除
+                // ========================================
+
+                displayedPhotos =
+                    displayedPhotos.filter(
+                        item =>
+                            item.id
+                            !==
+                            deletedId
+                    );
+
+
+
+                // ========================================
+                // 待機列から削除
+                // ========================================
+
+                newPhotoQueue =
+                    newPhotoQueue.filter(
+                        item =>
+                            item.id
+                            !==
+                            deletedId
+                    );
+
+
+
+                // ========================================
+                // 画面上から削除
+                // ========================================
+
+                removePhotoElementsById(
+                    deletedId
+                );
+
+
+
+                // ========================================
+                // 中央表示中の写真だった場合
+                // ========================================
+
+                if (
+                    currentSpecialPhotoId
+                    ===
+                    deletedId
+                ) {
+
+                    currentSpecialPhotoId =
+                        null;
+
+
+                    isSpecialPhotoPlaying =
+                        false;
+
+
+                    playNextQueuedPhoto();
+                }
             }
         )
-
-
-
-        // ========================================
-        // 接続
-        // ========================================
 
         .subscribe(
             function (
                 status
             ) {
 
-
                 console.log(
-                    "Realtime:",
+                    "Photo DELETE Realtime:",
                     status
                 );
             }
@@ -1778,17 +1961,111 @@ function startRealtime() {
 
 
 // ========================================
-// 22. 起動
+// 22. 画面サイズ変更時
+// ========================================
+
+window.addEventListener(
+    "resize",
+    function () {
+
+        /*
+           新着写真が表示中の場合でも
+           CSSの中央配置が維持されるため、
+           基本的には何もしなくてOK。
+
+           今後サイズ調整を追加する場合の
+           ために残しています。
+        */
+
+    }
+);
+
+
+
+// ========================================
+// 23. ページが非表示になった時
+// ========================================
+
+document.addEventListener(
+    "visibilitychange",
+    function () {
+
+        if (
+            document.hidden
+        ) {
+
+            console.log(
+                "Photo wall hidden"
+            );
+
+        } else {
+
+            console.log(
+                "Photo wall visible"
+            );
+        }
+    }
+);
+
+
+
+// ========================================
+// 24. 初期化
 // ========================================
 
 async function initializePhotoWall() {
 
+    if (
+        !photoWall
+    ) {
 
-    await loadExistingPhotos();
+        console.error(
+            "photoWall が見つかりません"
+        );
 
 
-    startRealtime();
+        return;
+    }
+
+
+    console.log(
+        "PHOTO SHUSHU START"
+    );
+
+
+
+    // ========================================
+    // 最初の写真を読み込む
+    // ========================================
+
+    await loadInitialPhotos();
+
+
+
+    // ========================================
+    // 新着写真を監視
+    // ========================================
+
+    subscribeToNewPhotos();
+
+
+
+    // ========================================
+    // 削除写真を監視
+    // ========================================
+
+    subscribeToDeletedPhotos();
+
+
+    console.log(
+        "PHOTO SHUSHU READY"
+    );
 }
 
+
+
+// ========================================
+// 25. 起動
+// ========================================
 
 initializePhotoWall();

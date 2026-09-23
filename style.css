@@ -15,7 +15,6 @@
 
 html,
 body {
-
     margin: 0;
     padding: 0;
 
@@ -27,7 +26,6 @@ body {
 
 
 body {
-
     font-family:
         Arial,
         Helvetica,
@@ -44,17 +42,13 @@ body {
 ======================================== */
 
 .wedding-background {
-
     position: fixed;
 
     top: 0;
     left: 0;
 
-    width:
-        100vw;
-
-    height:
-        100vh;
+    width: 100vw;
+    height: 100vh;
 
     background-image:
         url("images/navy-bg.webp");
@@ -68,8 +62,7 @@ body {
     background-repeat:
         no-repeat;
 
-    z-index:
-        0;
+    z-index: 0;
 
     pointer-events:
         none;
@@ -82,21 +75,16 @@ body {
 ======================================== */
 
 .wedding-title {
+    position: fixed;
 
-    position:
-        fixed;
+    top: 22px;
 
-    top:
-        22px;
-
-    left:
-        50%;
+    left: 50%;
 
     transform:
         translateX(-50%);
 
-    width:
-        100%;
+    width: 100%;
 
     text-align:
         center;
@@ -111,7 +99,6 @@ body {
         none;
 
     text-shadow:
-
         0 2px 4px
         rgba(0, 0, 0, 0.35),
 
@@ -121,7 +108,6 @@ body {
 
 
 .wedding-small-title {
-
     font-family:
         Georgia,
         "Times New Roman",
@@ -139,7 +125,6 @@ body {
 
 
 .wedding-names {
-
     font-family:
         Georgia,
         "Times New Roman",
@@ -164,7 +149,6 @@ body {
 
 
 .wedding-date {
-
     margin-top:
         8px;
 
@@ -182,7 +166,6 @@ body {
 
 
 .wedding-message {
-
     margin-top:
         10px;
 
@@ -200,7 +183,6 @@ body {
 ======================================== */
 
 .wedding-title::before {
-
     content:
         "";
 
@@ -220,7 +202,6 @@ body {
         210px;
 
     background:
-
         linear-gradient(
             to bottom,
             rgba(0, 20, 80, 0.28),
@@ -242,7 +223,6 @@ body {
 ======================================== */
 
 #photoWall {
-
     position:
         relative;
 
@@ -266,7 +246,6 @@ body {
 ======================================== */
 
 .photo {
-
     position:
         absolute;
 
@@ -283,7 +262,6 @@ body {
         3px;
 
     box-shadow:
-
         0 12px 28px
         rgba(0, 0, 0, 0.30),
 
@@ -307,15 +285,10 @@ body {
 
 .photo-flow,
 .flow-photo {
-
     animation:
-
         photoFlow
-
         var(--flow-duration)
-
         linear
-
         forwards;
 }
 
@@ -323,7 +296,6 @@ body {
 @keyframes photoFlow {
 
     0% {
-
         left:
             -300px;
 
@@ -331,46 +303,38 @@ body {
             0;
 
         transform:
-
             rotate(
                 var(--rotation)
             )
-
             translateY(0);
     }
 
 
     5% {
-
         opacity:
             1;
     }
 
 
     50% {
-
         opacity:
             1;
 
         transform:
-
             rotate(
                 var(--rotation)
             )
-
             translateY(-10px);
     }
 
 
     95% {
-
         opacity:
             1;
     }
 
 
     100% {
-
         left:
             110vw;
 
@@ -378,11 +342,9 @@ body {
             0;
 
         transform:
-
             rotate(
                 var(--rotation)
             )
-
             translateY(0);
     }
 }
@@ -394,7 +356,6 @@ body {
 ======================================== */
 
 .photo.new-photo {
-
     position:
         fixed;
 
@@ -435,23 +396,18 @@ body {
         5000;
 
     box-shadow:
-
         0 25px 60px
         rgba(0, 0, 0, 0.45);
 
     animation:
-
         newPhotoPop
-
         3.8s
-
         cubic-bezier(
             0.18,
             0.89,
             0.32,
             1.28
         )
-
         forwards;
 }
 
@@ -459,103 +415,79 @@ body {
 @keyframes newPhotoPop {
 
     0% {
-
         opacity:
             0;
 
         transform:
-
             translate(
                 -50%,
                 -50%
             )
-
             scale(0.1)
-
             rotate(-180deg);
     }
 
 
     20% {
-
         opacity:
             1;
 
         transform:
-
             translate(
                 -50%,
                 -50%
             )
-
             scale(1.08)
-
             rotate(20deg);
     }
 
 
     35% {
-
         transform:
-
             translate(
                 -50%,
                 -50%
             )
-
             scale(1.03)
-
             rotate(-10deg);
     }
 
 
     50% {
-
         transform:
-
             translate(
                 -50%,
                 -50%
             )
-
             scale(1)
-
             rotate(4deg);
     }
 
 
     75% {
-
         opacity:
             1;
 
         transform:
-
             translate(
                 -50%,
                 -50%
             )
-
             scale(1)
-
             rotate(0deg);
     }
 
 
     100% {
-
         opacity:
             0;
 
         transform:
-
             translate(
                 -50%,
                 -50%
             )
-
             scale(0.75)
-
             rotate(8deg);
     }
 }
@@ -564,21 +496,40 @@ body {
 
 /* ========================================
    新着写真のキラキラ
+
+   ★や黒い装飾は使わない
+
+   SILVER / WHITE / SOFT GOLD
+
+   ・銀をメイン
+   ・白い光
+   ・淡い金をアクセント
+   ・十字型の上品な輝き
 ======================================== */
 
 .photo-sparkle {
-
     position:
         fixed;
 
+    /*
+       JS側からサイズが指定されるため
+       初期値だけ設定
+    */
     width:
-        8px;
+        6px;
 
     height:
-        8px;
+        6px;
+
+    /*
+       JSから
+       銀・白・金のcolorが渡される
+    */
+    color:
+        #eef2f6;
 
     background:
-        white;
+        currentColor;
 
     border-radius:
         50%;
@@ -589,62 +540,309 @@ body {
     z-index:
         6000;
 
+    opacity:
+        0;
+
+    /*
+       中心を柔らかく光らせる
+    */
     box-shadow:
+        0 0 5px
+        currentColor,
 
-        0 0 8px white,
+        0 0 12px
+        currentColor,
 
-        0 0 18px #b9e8ff,
+        0 0 24px
+        rgba(
+            255,
+            255,
+            255,
+            0.45
+        );
 
-        0 0 28px
-        rgba(255, 255, 255, 0.85);
-
+    /*
+       写真の周りから
+       外へふわっと広がる
+    */
     animation:
-
-        sparkleAnimation
-
-        1.2s
-
-        ease-out
-
+        elegantWeddingSparkle
+        1.55s
+        cubic-bezier(
+            0.18,
+            0.75,
+            0.22,
+            1
+        )
         forwards;
+
+    will-change:
+        transform,
+        opacity;
+
+    filter:
+        brightness(1.12);
 }
 
 
-@keyframes sparkleAnimation {
+
+/* ========================================
+   縦方向の細い光
+======================================== */
+
+.photo-sparkle::before {
+    content:
+        "";
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    width:
+        1.5px;
+
+    height:
+        320%;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
+
+    border-radius:
+        999px;
+
+    background:
+        linear-gradient(
+            to bottom,
+
+            transparent
+            0%,
+
+            rgba(
+                255,
+                255,
+                255,
+                0.05
+            )
+            12%,
+
+            currentColor
+            42%,
+
+            rgba(
+                255,
+                255,
+                255,
+                1
+            )
+            50%,
+
+            currentColor
+            58%,
+
+            rgba(
+                255,
+                255,
+                255,
+                0.05
+            )
+            88%,
+
+            transparent
+            100%
+        );
+
+    box-shadow:
+        0 0 4px
+        currentColor;
+}
+
+
+
+/* ========================================
+   横方向の細い光
+======================================== */
+
+.photo-sparkle::after {
+    content:
+        "";
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    width:
+        320%;
+
+    height:
+        1.5px;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
+
+    border-radius:
+        999px;
+
+    background:
+        linear-gradient(
+            to right,
+
+            transparent
+            0%,
+
+            rgba(
+                255,
+                255,
+                255,
+                0.05
+            )
+            12%,
+
+            currentColor
+            42%,
+
+            rgba(
+                255,
+                255,
+                255,
+                1
+            )
+            50%,
+
+            currentColor
+            58%,
+
+            rgba(
+                255,
+                255,
+                255,
+                0.05
+            )
+            88%,
+
+            transparent
+            100%
+        );
+
+    box-shadow:
+        0 0 4px
+        currentColor;
+}
+/* ========================================
+   上品なキラキラアニメーション
+
+   写真の周囲で
+   キラン → 少し広がる → 消える
+======================================== */
+
+@keyframes elegantWeddingSparkle {
 
     0% {
-
         opacity:
             0;
 
         transform:
-            scale(0);
+            translate(
+                0,
+                0
+            )
+            scale(0.15)
+            rotate(0deg);
     }
 
 
-    20% {
-
+    15% {
         opacity:
             1;
 
         transform:
-            scale(1.5);
+            translate(
+                calc(
+                    var(--sparkle-x)
+                    *
+                    0.08
+                ),
+                calc(
+                    var(--sparkle-y)
+                    *
+                    0.08
+                )
+            )
+            scale(1.25)
+            rotate(10deg);
+    }
+
+
+    35% {
+        opacity:
+            1;
+
+        transform:
+            translate(
+                calc(
+                    var(--sparkle-x)
+                    *
+                    0.30
+                ),
+                calc(
+                    var(--sparkle-y)
+                    *
+                    0.30
+                )
+            )
+            scale(0.95)
+            rotate(22deg);
+    }
+
+
+    65% {
+        opacity:
+            0.72;
+
+        transform:
+            translate(
+                calc(
+                    var(--sparkle-x)
+                    *
+                    0.68
+                ),
+                calc(
+                    var(--sparkle-y)
+                    *
+                    0.68
+                )
+            )
+            scale(0.60)
+            rotate(38deg);
     }
 
 
     100% {
-
         opacity:
             0;
 
         transform:
-
-            scale(0.2)
-
             translate(
                 var(--sparkle-x),
                 var(--sparkle-y)
-            );
+            )
+            scale(0.12)
+            rotate(55deg);
     }
 }
 
@@ -659,14 +857,12 @@ body {
 ) {
 
     .wedding-title {
-
         top:
             14px;
     }
 
 
     .wedding-small-title {
-
         font-size:
             10px;
 
@@ -676,7 +872,6 @@ body {
 
 
     .wedding-names {
-
         font-size:
             28px;
 
@@ -686,7 +881,6 @@ body {
 
 
     .wedding-date {
-
         font-size:
             13px;
 
@@ -696,7 +890,6 @@ body {
 
 
     .wedding-message {
-
         font-size:
             10px;
 
@@ -706,14 +899,12 @@ body {
 
 
     .photo {
-
         padding:
             5px;
     }
 
 
     .photo.new-photo {
-
         max-width:
             78vw !important;
 
