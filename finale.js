@@ -1,29 +1,32 @@
 /* =========================================================
-   PHOTO SHUSHU
-   Wedding Finale
-   写真集合 → ハート → 星 → THANK YOU → Special Thanks
+   MEMORY FLOW
+   WEDDING FINALE
+
+   写真が散らばる
+        ↓
+   ♥ ハートへ集合
+        ↓
+   ♥で静止
+        ↓
+   同じ写真が★へ変形
+        ↓
+   ★で静止
+        ↓
+   THANK YOU
+        ↓
+   Special Thanks
 ========================================================= */
 
 
 /* =========================================================
-   Supabase
+   SUPABASE
 ========================================================= */
 
 const FINALE_SUPABASE_URL =
     "https://tnqnowlvtnrzrcydcsmi.supabase.co";
 
-
-/*
-   ★あとでここだけ変更します★
-
-   script.js で現在使っている
-   Publishable key と同じものを入れます。
-
-   今はこのままでOKです。
-*/
 const FINALE_SUPABASE_ANON_KEY =
     "sb_publishable_Mp7PsY2wh5VZtEDYC9fHrg_wvFDa8rO";
-
 
 const finaleSupabase =
     window.supabase.createClient(
@@ -32,414 +35,855 @@ const finaleSupabase =
     );
 
 
-
 /* =========================================================
    基本設定
 ========================================================= */
 
-const FINALE_MAX_PHOTOS =
-    200;
+const FINALE_MAX_PHOTOS = 200;
 
-
-let finaleRunning =
-    false;
-
-
-let lastFinaleCommand =
-    "";
-
-
-let finaleTimers =
-    [];
-
+let finaleRunning = false;
+let finaleTimers = [];
+let lastFinaleCommand = "";
 
 
 /* =========================================================
    タイマー
 ========================================================= */
 
-function addFinaleTimer(
-    callback,
-    delay
-) {
-
-    const timer =
-        setTimeout(
-            callback,
-            delay
-        );
-
-
-    finaleTimers.push(
-        timer
-    );
+function addFinaleTimer(callback, delay) {
+    const timer = setTimeout(callback, delay);
+    finaleTimers.push(timer);
 }
 
 
 function clearFinaleTimers() {
+    finaleTimers.forEach(function (timer) {
+        clearTimeout(timer);
+    });
 
-    finaleTimers.forEach(
-        timer => {
-
-            clearTimeout(
-                timer
-            );
-        }
-    );
-
-
-    finaleTimers =
-        [];
+    finaleTimers = [];
 }
 
 
-
 /* =========================================================
-   フィナーレ画面を作る
+   フィナーレ画面作成
 ========================================================= */
 
 function createFinaleScreen() {
 
-    if (
-        document.getElementById(
-            "finaleOverlay"
-        )
-    ) {
-
+    if (document.getElementById("finaleOverlay")) {
         return;
     }
 
+    const overlay = document.createElement("div");
 
-    const overlay =
-        document.createElement(
-            "div"
-        );
-
-
-    overlay.id =
-        "finaleOverlay";
-
+    overlay.id = "finaleOverlay";
 
     overlay.innerHTML = `
 
-        <div
-            class="finale-glow"
-        ></div>
-
+        <div class="finale-glow"></div>
 
         <div
             id="finalePhotoStage"
+            class="finale-photo-stage"
         ></div>
-
 
         <div
             id="finaleThankYou"
             class="finale-message"
         >
 
-            <div
-                class="finale-thankyou-main"
-            >
+            <div class="finale-thankyou-main">
                 THANK YOU
             </div>
 
-
-            <div
-                class="finale-thankyou-names"
-            >
+            <div class="finale-thankyou-names">
                 RYUNOSUKE &amp; MAKOTO
             </div>
 
+            <div class="finale-divider"></div>
 
-            <div
-                class="finale-divider"
-            ></div>
-
-
-            <div
-                class="finale-thankyou-date"
-            >
+            <div class="finale-thankyou-date">
                 2027.02.22
             </div>
 
         </div>
-
 
         <div
             id="finaleSpecialThanks"
             class="finale-message"
         >
 
-            <div
-                class="finale-special-title"
-            >
+            <div class="finale-special-title">
                 Special Thanks
             </div>
 
-
-            <div
-                class="finale-special-text"
-            >
+            <div class="finale-special-text">
                 みなさまの素敵な写真が<br>
                 最高の思い出になりました<br>
                 本当にありがとうございました
             </div>
 
-
-            <div
-                class="finale-divider"
-            ></div>
+            <div class="finale-divider"></div>
 
         </div>
-
     `;
 
-
-    document.body.appendChild(
-        overlay
-    );
-
+    document.body.appendChild(overlay);
 
     createFinaleSparkles();
 }
 
 
-
 /* =========================================================
-   星のキラキラ
+   キラキラ
 ========================================================= */
 
 function createFinaleSparkles() {
 
     const overlay =
-        document.getElementById(
-            "finaleOverlay"
-        );
+        document.getElementById("finaleOverlay");
 
-
-    if (
-        !overlay
-    ) {
-
+    if (!overlay) {
         return;
     }
 
-
-    for (
-        let i = 0;
-        i < 45;
-        i++
-    ) {
+    for (let i = 0; i < 40; i++) {
 
         const sparkle =
-            document.createElement(
-                "div"
-            );
-
+            document.createElement("div");
 
         sparkle.className =
             "finale-sparkle";
 
+        sparkle.style.setProperty(
+            "--sparkle-left",
+            (3 + Math.random() * 94) + "%"
+        );
 
         sparkle.style.setProperty(
-            "--sl",
-            (
-                3
-                +
-                Math.random()
-                *
-                94
-            )
-            +
-            "%"
+            "--sparkle-top",
+            (3 + Math.random() * 94) + "%"
         );
-
 
         sparkle.style.setProperty(
-            "--st",
-            (
-                4
-                +
-                Math.random()
-                *
-                92
-            )
-            +
-            "%"
+            "--sparkle-size",
+            (3 + Math.random() * 7) + "px"
         );
-
 
         sparkle.style.setProperty(
-            "--ss",
-            (
-                3
-                +
-                Math.random()
-                *
-                6
-            )
-            +
-            "px"
+            "--sparkle-duration",
+            (2 + Math.random() * 3) + "s"
         );
-
 
         sparkle.style.setProperty(
-            "--sd",
-            (
-                1.8
-                +
-                Math.random()
-                *
-                2.8
-            )
-            +
-            "s"
+            "--sparkle-delay",
+            (Math.random() * 3) + "s"
         );
 
-
-        sparkle.style.setProperty(
-            "--sdelay",
-            (
-                Math.random()
-                *
-                3
-            )
-            +
-            "s"
-        );
-
-
-        overlay.appendChild(
-            sparkle
-        );
+        overlay.appendChild(sparkle);
     }
 }
 
 
-
 /* =========================================================
-   Supabaseからフィナーレ用写真取得
+   SUPABASEから写真取得
 ========================================================= */
 
 async function getFinalePhotos() {
 
-    const {
-        data,
-        error
-    } =
+    const { data, error } =
         await finaleSupabase
-
-            .from(
-                "photos"
-            )
-
+            .from("photos")
             .select(
                 "id, image_url, created_at"
             )
-
             .order(
                 "created_at",
                 {
-                    ascending:
-                        false
+                    ascending: false
                 }
             )
+            .limit(FINALE_MAX_PHOTOS);
 
-            .limit(
-                FINALE_MAX_PHOTOS
-            );
-
-
-    if (
-        error
-    ) {
+    if (error) {
 
         console.error(
             "Finale photo load error:",
             error
         );
 
-
         return [];
     }
 
-
-    return (
-        data
-        ||
-        []
-    ).reverse();
+    return (data || []).reverse();
 }
 
+
+/* =========================================================
+   ♥ ハート配置
+
+   今回の重要変更点。
+
+   ハートの「線」ではなく
+   ハートの内側を判定して、
+   中まで写真で埋める。
+========================================================= */
+
+function generateHeartLayout(photoCount) {
+
+    function insideHeart(x, y) {
+
+        const a =
+            x * x
+            +
+            y * y
+            -
+            1;
+
+        return (
+            a * a * a
+            -
+            x * x * y * y * y
+        ) <= 0;
+    }
+
+
+    let bestPoints = [];
+    let bestDifference = Infinity;
+
+
+    /*
+       写真枚数にちょうど良い
+       格子の細かさを自動で探す
+    */
+
+    for (
+        let step = 0.34;
+        step >= 0.075;
+        step -= 0.005
+    ) {
+
+        const points = [];
+
+        let row = 0;
+
+
+        for (
+            let y = -1.12;
+            y <= 1.18;
+            y += step
+        ) {
+
+            /*
+               1段おきに少しずらすことで
+               写真の隙間を減らす
+            */
+
+            const offset =
+                (row % 2)
+                *
+                step
+                *
+                0.5;
+
+
+            for (
+                let x =
+                    -1.28
+                    +
+                    offset;
+
+                x <= 1.28;
+
+                x += step
+            ) {
+
+                /*
+                   ハート内部だけ採用
+                */
+
+                if (
+                    insideHeart(
+                        x,
+                        -y
+                    )
+                ) {
+
+                    points.push({
+
+                        /*
+                           横幅
+                        */
+
+                        x:
+                            50
+                            +
+                            x
+                            *
+                            28.5,
+
+                        /*
+                           高さ
+                        */
+
+                        y:
+                            49
+                            +
+                            y
+                            *
+                            27.0
+                    });
+                }
+            }
+
+            row++;
+        }
+
+
+        const difference =
+            Math.abs(
+                points.length
+                -
+                photoCount
+            );
+
+
+        if (
+            difference
+            <
+            bestDifference
+        ) {
+
+            bestDifference =
+                difference;
+
+            bestPoints =
+                points;
+        }
+    }
+
+
+    /*
+       配置点の方が多い場合。
+
+       上から単純に削除すると
+       ハートの下側が消えてしまうので
+       全体から均等に取る。
+    */
+
+    if (
+        bestPoints.length
+        >
+        photoCount
+    ) {
+
+        const selected = [];
+
+
+        for (
+            let i = 0;
+            i < photoCount;
+            i++
+        ) {
+
+            const index =
+                Math.floor(
+                    i
+                    *
+                    bestPoints.length
+                    /
+                    photoCount
+                );
+
+
+            selected.push(
+                bestPoints[index]
+            );
+        }
+
+
+        bestPoints =
+            selected;
+    }
+
+
+    /*
+       万が一写真の方が多かった場合。
+
+       ハート内部へ追加する。
+    */
+
+    let safety = 0;
+
+
+    while (
+        bestPoints.length
+        <
+        photoCount
+        &&
+        safety
+        <
+        20000
+    ) {
+
+        safety++;
+
+
+        const x =
+            -1.25
+            +
+            Math.random()
+            *
+            2.5;
+
+
+        const y =
+            -1.08
+            +
+            Math.random()
+            *
+            2.18;
+
+
+        if (
+            insideHeart(
+                x,
+                -y
+            )
+        ) {
+
+            bestPoints.push({
+
+                x:
+                    50
+                    +
+                    x
+                    *
+                    28.5,
+
+                y:
+                    49
+                    +
+                    y
+                    *
+                    27.0
+            });
+        }
+    }
+
+
+    return bestPoints.slice(
+        0,
+        photoCount
+    );
+}
+
+
+/* =========================================================
+   ★ 星の形
+
+   今回は左右を短くする。
+
+   outerX < outerY にすることで
+   横へ広がりすぎない★になる。
+========================================================= */
+
+function createStarPolygon() {
+
+    const points = [];
+
+
+    /*
+       ★の外側
+
+       横 36
+       縦 43
+
+       → 前より左右が短い
+    */
+
+    const outerX = 36;
+    const outerY = 43;
+
+
+    /*
+       ★の内側
+    */
+
+    const innerX = 16.5;
+    const innerY = 19.5;
+
+
+    for (
+        let i = 0;
+        i < 10;
+        i++
+    ) {
+
+        const angle =
+            -Math.PI / 2
+            +
+            i
+            *
+            Math.PI / 5;
+
+
+        const isOuter =
+            i % 2 === 0;
+
+
+        points.push({
+
+            x:
+                50
+                +
+                Math.cos(angle)
+                *
+                (
+                    isOuter
+                    ?
+                    outerX
+                    :
+                    innerX
+                ),
+
+            y:
+                50
+                +
+                Math.sin(angle)
+                *
+                (
+                    isOuter
+                    ?
+                    outerY
+                    :
+                    innerY
+                )
+        });
+    }
+
+
+    return points;
+}
+
+
+/* =========================================================
+   点が★の内側にあるか判定
+========================================================= */
+
+function pointInsidePolygon(
+    x,
+    y,
+    polygon
+) {
+
+    let inside = false;
+
+
+    for (
+        let i = 0,
+            j = polygon.length - 1;
+
+        i < polygon.length;
+
+        j = i++
+    ) {
+
+        const xi =
+            polygon[i].x;
+
+        const yi =
+            polygon[i].y;
+
+        const xj =
+            polygon[j].x;
+
+        const yj =
+            polygon[j].y;
+
+
+        const intersect =
+            (
+                (yi > y)
+                !==
+                (yj > y)
+            )
+            &&
+            (
+                x
+                <
+                (
+                    (xj - xi)
+                    *
+                    (y - yi)
+                    /
+                    (
+                        (yj - yi)
+                        ||
+                        0.000001
+                    )
+                )
+                +
+                xi
+            );
+
+
+        if (intersect) {
+            inside = !inside;
+        }
+    }
+
+
+    return inside;
+}
+
+
+/* =========================================================
+   ★配置生成
+
+   ★の内部まで写真で埋める。
+========================================================= */
+
+function generateStarLayout(photoCount) {
+
+    const polygon =
+        createStarPolygon();
+
+
+    let bestPoints = [];
+    let bestDifference = Infinity;
+    let bestStep = 8;
+
+
+    /*
+       写真枚数に近くなる
+       格子サイズを探す
+    */
+
+    for (
+        let step = 12;
+        step >= 2.2;
+        step -= 0.12
+    ) {
+
+        const points = [];
+
+        let row = 0;
+
+
+        for (
+            let y = step / 2;
+            y < 100;
+            y += step
+        ) {
+
+            /*
+               1段ごとに半分ずらす
+            */
+
+            const offset =
+                row % 2 === 0
+                    ?
+                    0
+                    :
+                    step / 2;
+
+
+            for (
+                let x =
+                    step / 2
+                    +
+                    offset;
+
+                x < 100;
+
+                x += step
+            ) {
+
+                if (
+                    pointInsidePolygon(
+                        x,
+                        y,
+                        polygon
+                    )
+                ) {
+
+                    points.push({
+                        x: x,
+                        y: y
+                    });
+                }
+            }
+
+
+            row++;
+        }
+
+
+        const difference =
+            Math.abs(
+                points.length
+                -
+                photoCount
+            );
+
+
+        if (
+            difference
+            <
+            bestDifference
+        ) {
+
+            bestDifference =
+                difference;
+
+            bestPoints =
+                points;
+
+            bestStep =
+                step;
+        }
+    }
+
+
+    /*
+       点が多い場合は
+       ★全体から均等に選ぶ
+    */
+
+    if (
+        bestPoints.length
+        >
+        photoCount
+    ) {
+
+        const selected = [];
+
+
+        for (
+            let i = 0;
+            i < photoCount;
+            i++
+        ) {
+
+            const index =
+                Math.floor(
+                    i
+                    *
+                    bestPoints.length
+                    /
+                    photoCount
+                );
+
+
+            selected.push(
+                bestPoints[index]
+            );
+        }
+
+
+        bestPoints =
+            selected;
+    }
+
+
+    /*
+       万が一足りない場合
+       ★内部に追加
+    */
+
+    let safety = 0;
+
+
+    while (
+        bestPoints.length
+        <
+        photoCount
+        &&
+        safety
+        <
+        10000
+    ) {
+
+        safety++;
+
+
+        const x =
+            8
+            +
+            Math.random()
+            *
+            84;
+
+
+        const y =
+            5
+            +
+            Math.random()
+            *
+            90;
+
+
+        if (
+            pointInsidePolygon(
+                x,
+                y,
+                polygon
+            )
+        ) {
+
+            bestPoints.push({
+                x: x,
+                y: y
+            });
+        }
+    }
+
+
+    return {
+
+        points:
+            bestPoints.slice(
+                0,
+                photoCount
+            ),
+
+        size:
+            bestStep
+            *
+            1.04
+    };
+}
 
 
 /* =========================================================
    写真サイズ
 ========================================================= */
 
-function getFinalePhotoSize(
-    count
+function getFinalePhotoDimensions(
+    photoCount,
+    baseSize
 ) {
 
-    let width;
+    let width =
+        baseSize;
 
 
     if (
-        count <= 30
+        photoCount <= 35
     ) {
 
-        width =
-            Math.min(
-                92,
-                window.innerWidth
-                *
-                0.085
-            );
+        width *= 1.08;
     }
 
-    else if (
-        count <= 70
+
+    if (
+        photoCount >= 120
     ) {
 
-        width =
-            Math.min(
-                76,
-                window.innerWidth
-                *
-                0.065
-            );
+        width *= 0.92;
     }
-
-    else if (
-        count <= 120
-    ) {
-
-        width =
-            Math.min(
-                62,
-                window.innerWidth
-                *
-                0.052
-            );
-    }
-
-    else {
-
-        width =
-            Math.min(
-                52,
-                window.innerWidth
-                *
-                0.043
-            );
-    }
-
-
-    width =
-        Math.max(
-            width,
-            28
-        );
 
 
     return {
@@ -450,473 +894,24 @@ function getFinalePhotoSize(
         height:
             width
             *
-            0.74
+            0.72
     };
 }
 
 
-
 /* =========================================================
-   ハート座標
+   写真作成
+
+   1枚の写真に
+
+   ・散らばり位置
+   ・♥位置
+   ・★位置
+
+   を全部持たせる
 ========================================================= */
 
-function createHeartPoint(
-    angle,
-    ratio
-) {
-
-    const x =
-        16
-        *
-        Math.pow(
-            Math.sin(
-                angle
-            ),
-            3
-        );
-
-
-    const y =
-        13
-        *
-        Math.cos(
-            angle
-        )
-
-        -
-
-        5
-        *
-        Math.cos(
-            2
-            *
-            angle
-        )
-
-        -
-
-        2
-        *
-        Math.cos(
-            3
-            *
-            angle
-        )
-
-        -
-
-        Math.cos(
-            4
-            *
-            angle
-        );
-
-
-    return {
-
-        x:
-            50
-            +
-            x
-            *
-            1.35
-            *
-            ratio,
-
-        y:
-            52
-            -
-            y
-            *
-            1.22
-            *
-            ratio
-    };
-}
-
-
-function getHeartPoints(
-    count
-) {
-
-    const points =
-        [];
-
-
-    const rings =
-        Math.max(
-            4,
-            Math.ceil(
-                Math.sqrt(
-                    count
-                )
-                /
-                1.5
-            )
-        );
-
-
-    for (
-        let ring = rings;
-        ring >= 1;
-        ring--
-    ) {
-
-        if (
-            points.length
-            >=
-            count
-        ) {
-
-            break;
-        }
-
-
-        const ratio =
-            ring
-            /
-            rings;
-
-
-        const ringCount =
-            Math.max(
-                5,
-                Math.ceil(
-                    count
-                    /
-                    rings
-                )
-            );
-
-
-        for (
-            let i = 0;
-            i < ringCount;
-            i++
-        ) {
-
-            if (
-                points.length
-                >=
-                count
-            ) {
-
-                break;
-            }
-
-
-            const angle =
-                Math.PI
-                *
-                2
-                *
-                i
-                /
-                ringCount;
-
-
-            points.push(
-                createHeartPoint(
-                    angle,
-                    ratio
-                )
-            );
-        }
-    }
-
-
-    while (
-        points.length
-        <
-        count
-    ) {
-
-        points.push(
-            {
-
-                x:
-                    50
-                    +
-                    (
-                        Math.random()
-                        -
-                        0.5
-                    )
-                    *
-                    16,
-
-                y:
-                    53
-                    +
-                    (
-                        Math.random()
-                        -
-                        0.5
-                    )
-                    *
-                    14
-            }
-        );
-    }
-
-
-    return points;
-}
-
-
-
-/* =========================================================
-   星の座標
-========================================================= */
-
-function createStarVertices() {
-
-    const vertices =
-        [];
-
-
-    for (
-        let i = 0;
-        i < 10;
-        i++
-    ) {
-
-        const angle =
-            -Math.PI
-            /
-            2
-
-            +
-
-            i
-            *
-            Math.PI
-            /
-            5;
-
-
-        const radius =
-            i % 2 === 0
-            ?
-            1
-            :
-            0.43;
-
-
-        vertices.push(
-            {
-
-                x:
-                    50
-                    +
-                    Math.cos(
-                        angle
-                    )
-                    *
-                    32
-                    *
-                    radius,
-
-                y:
-                    52
-                    +
-                    Math.sin(
-                        angle
-                    )
-                    *
-                    34
-                    *
-                    radius
-            }
-        );
-    }
-
-
-    return vertices;
-}
-
-
-function getStarPoints(
-    count
-) {
-
-    const vertices =
-        createStarVertices();
-
-
-    const points =
-        [];
-
-
-    const outlineCount =
-        Math.min(
-            count,
-            Math.max(
-                20,
-                Math.round(
-                    count
-                    *
-                    0.58
-                )
-            )
-        );
-
-
-    for (
-        let i = 0;
-        i < outlineCount;
-        i++
-    ) {
-
-        const position =
-            i
-            /
-            outlineCount
-            *
-            10;
-
-
-        const segment =
-            Math.floor(
-                position
-            )
-            %
-            10;
-
-
-        const progress =
-            position
-            -
-            Math.floor(
-                position
-            );
-
-
-        const start =
-            vertices[
-                segment
-            ];
-
-
-        const end =
-            vertices[
-                (
-                    segment
-                    +
-                    1
-                )
-                %
-                10
-            ];
-
-
-        points.push(
-            {
-
-                x:
-                    start.x
-                    +
-                    (
-                        end.x
-                        -
-                        start.x
-                    )
-                    *
-                    progress,
-
-                y:
-                    start.y
-                    +
-                    (
-                        end.y
-                        -
-                        start.y
-                    )
-                    *
-                    progress
-            }
-        );
-    }
-
-
-    while (
-        points.length
-        <
-        count
-    ) {
-
-        const source =
-            points[
-                Math.floor(
-                    Math.random()
-                    *
-                    Math.max(
-                        1,
-                        points.length
-                    )
-                )
-            ]
-
-            ||
-
-            {
-                x:
-                    50,
-
-                y:
-                    52
-            };
-
-
-        const shrink =
-            0.25
-            +
-            Math.random()
-            *
-            0.68;
-
-
-        points.push(
-            {
-
-                x:
-                    50
-                    +
-                    (
-                        source.x
-                        -
-                        50
-                    )
-                    *
-                    shrink,
-
-                y:
-                    52
-                    +
-                    (
-                        source.y
-                        -
-                        52
-                    )
-                    *
-                    shrink
-            }
-        );
-    }
-
-
-    return points;
-}
-
-
-
-/* =========================================================
-   写真を作る
-========================================================= */
-
-function buildFinalePhotos(
-    photos
-) {
+function buildFinalePhotos(photos) {
 
     const stage =
         document.getElementById(
@@ -924,25 +919,34 @@ function buildFinalePhotos(
         );
 
 
-    stage.innerHTML =
-        "";
+    if (!stage) {
+        return;
+    }
+
+
+    stage.innerHTML = "";
 
 
     const heartPoints =
-        getHeartPoints(
+        generateHeartLayout(
+            photos.length
+        );
+
+
+    const starLayout =
+        generateStarLayout(
             photos.length
         );
 
 
     const starPoints =
-        getStarPoints(
-            photos.length
-        );
+        starLayout.points;
 
 
-    const size =
-        getFinalePhotoSize(
-            photos.length
+    const dimensions =
+        getFinalePhotoDimensions(
+            photos.length,
+            starLayout.size
         );
 
 
@@ -951,6 +955,24 @@ function buildFinalePhotos(
             photoData,
             index
         ) {
+
+            const heartPoint =
+                heartPoints[index];
+
+
+            const starPoint =
+                starPoints[index];
+
+
+            if (
+                !heartPoint
+                ||
+                !starPoint
+            ) {
+
+                return;
+            }
+
 
             const photo =
                 document.createElement(
@@ -962,131 +984,151 @@ function buildFinalePhotos(
                 "finale-photo";
 
 
-            photo.alt =
-                "";
+            photo.alt = "";
 
+
+            /* =============================================
+               ♥位置
+            ============================================= */
 
             photo.style.setProperty(
-                "--pw",
-                size.width
-                +
-                "px"
+                "--heart-x",
+                heartPoint.x + "%"
             );
 
 
             photo.style.setProperty(
-                "--ph",
-                size.height
-                +
-                "px"
+                "--heart-y",
+                heartPoint.y + "%"
+            );
+
+
+            /* =============================================
+               ★位置
+            ============================================= */
+
+            photo.style.setProperty(
+                "--star-x",
+                starPoint.x + "%"
             );
 
 
             photo.style.setProperty(
-                "--gx",
+                "--star-y",
+                starPoint.y + "%"
+            );
+
+
+            /* =============================================
+               写真サイズ
+
+               サイズ差は少しだけにする。
+
+               バラバラ感は残すが、
+               ♥と★の形が崩れないようにする。
+            ============================================= */
+
+            const sizeVariation =
+                0.94
+                +
+                Math.random()
+                *
+                0.10;
+
+
+            photo.style.setProperty(
+                "--photo-width",
+                (
+                    dimensions.width
+                    *
+                    sizeVariation
+                )
+                +
+                "%"
+            );
+
+
+            photo.style.setProperty(
+                "--photo-height",
+                (
+                    dimensions.height
+                    *
+                    sizeVariation
+                )
+                +
+                "%"
+            );
+
+
+            /* =============================================
+               最初の散らばり位置
+            ============================================= */
+
+            const startX =
+                4
+                +
+                Math.random()
+                *
+                92;
+
+
+            const startY =
+                4
+                +
+                Math.random()
+                *
+                92;
+
+
+            photo.style.setProperty(
+                "--start-x",
+                startX + "%"
+            );
+
+
+            photo.style.setProperty(
+                "--start-y",
+                startY + "%"
+            );
+
+
+            /* =============================================
+               最初の傾き
+            ============================================= */
+
+            const rotation =
+                -16
+                +
+                Math.random()
+                *
+                32;
+
+
+            photo.style.setProperty(
+                "--start-rotation",
+                rotation + "deg"
+            );
+
+
+            /* =============================================
+               ♥へ集まる時間差
+            ============================================= */
+
+            photo.style.setProperty(
+                "--move-delay",
                 (
                     Math.random()
                     *
-                    180
-                    -
-                    90
+                    0.55
                 )
                 +
-                "px"
+                "s"
             );
 
 
-            photo.style.setProperty(
-                "--gy",
-                (
-                    Math.random()
-                    *
-                    150
-                    -
-                    75
-                )
-                +
-                "px"
-            );
-
-
-            photo.style.setProperty(
-                "--gr",
-                (
-                    Math.random()
-                    *
-                    30
-                    -
-                    15
-                )
-                +
-                "deg"
-            );
-
-
-            photo.style.setProperty(
-                "--hx",
-                heartPoints[
-                    index
-                ].x
-                +
-                "%"
-            );
-
-
-            photo.style.setProperty(
-                "--hy",
-                heartPoints[
-                    index
-                ].y
-                +
-                "%"
-            );
-
-
-            photo.style.setProperty(
-                "--sx",
-                starPoints[
-                    index
-                ].x
-                +
-                "%"
-            );
-
-
-            photo.style.setProperty(
-                "--sy",
-                starPoints[
-                    index
-                ].y
-                +
-                "%"
-            );
-
-
-            photo.addEventListener(
-                "load",
-                function () {
-
-                    setTimeout(
-                        function () {
-
-                            photo.classList.add(
-                                "visible"
-                            );
-
-                        },
-                        index
-                        *
-                        10
-                    );
-                },
-                {
-                    once:
-                        true
-                }
-            );
-
+            /* =============================================
+               写真読み込み失敗時
+            ============================================= */
 
             photo.addEventListener(
                 "error",
@@ -1095,8 +1137,7 @@ function buildFinalePhotos(
                     photo.remove();
                 },
                 {
-                    once:
-                        true
+                    once: true
                 }
             );
 
@@ -1108,42 +1149,16 @@ function buildFinalePhotos(
 
             photo.src =
                 photoData.image_url;
-
-
-            if (
-                photo.complete
-                &&
-                photo.naturalWidth
-                >
-                0
-            ) {
-
-                setTimeout(
-                    function () {
-
-                        photo.classList.add(
-                            "visible"
-                        );
-
-                    },
-                    index
-                    *
-                    10
-                );
-            }
         }
     );
 }
 
 
-
 /* =========================================================
-   フィナーレ段階切替
+   散らばった写真を表示
 ========================================================= */
 
-function setFinalePhase(
-    phase
-) {
+function showScatteredPhotos() {
 
     const overlay =
         document.getElementById(
@@ -1151,47 +1166,121 @@ function setFinalePhase(
         );
 
 
-    overlay.classList.remove(
-        "finale-gather",
-        "finale-heart",
-        "finale-star"
-    );
-
-
-    if (
-        phase
-    ) {
-
-        overlay.classList.add(
-            phase
-        );
+    if (!overlay) {
+        return;
     }
-}
 
+
+    overlay.classList.add(
+        "finale-scattered"
+    );
+}
 
 
 /* =========================================================
-   写真を消す
+   ♥へ集合
 ========================================================= */
 
-function fadeFinalePhotos() {
+function assemblePhotoHeart() {
 
-    document
-        .querySelectorAll(
-            ".finale-photo"
-        )
-        .forEach(
-            function (
-                photo
-            ) {
-
-                photo.classList.add(
-                    "fade"
-                );
-            }
+    const overlay =
+        document.getElementById(
+            "finaleOverlay"
         );
+
+
+    if (!overlay) {
+        return;
+    }
+
+
+    overlay.classList.remove(
+        "finale-star-assembled"
+    );
+
+
+    overlay.classList.add(
+        "finale-heart-assembled"
+    );
 }
 
+
+/* =========================================================
+   ♥ → ★
+========================================================= */
+
+function transformHeartToStar() {
+
+    const overlay =
+        document.getElementById(
+            "finaleOverlay"
+        );
+
+
+    if (!overlay) {
+        return;
+    }
+
+
+    const photos =
+        document.querySelectorAll(
+            "#finalePhotoStage .finale-photo"
+        );
+
+
+    /*
+       ♥から★への変形は
+       ほぼ一斉に動かす。
+
+       少しだけ時間差をつけて
+       有機的な動きにする。
+    */
+
+    photos.forEach(
+        function (photo) {
+
+            photo.style.setProperty(
+                "--move-delay",
+                (
+                    Math.random()
+                    *
+                    0.18
+                )
+                +
+                "s"
+            );
+        }
+    );
+
+
+    overlay.classList.remove(
+        "finale-heart-assembled"
+    );
+
+
+    overlay.classList.add(
+        "finale-star-assembled"
+    );
+}
+/* =========================================================
+   ★を消す
+========================================================= */
+
+function hidePhotoStar() {
+
+    const overlay =
+        document.getElementById(
+            "finaleOverlay"
+        );
+
+    if (!overlay) {
+        return;
+    }
+
+    overlay.classList.add(
+        "finale-star-fade"
+    );
+}
 
 
 /* =========================================================
@@ -1200,45 +1289,61 @@ function fadeFinalePhotos() {
 
 function showFinaleThankYou() {
 
-    fadeFinalePhotos();
+    hidePhotoStar();
 
-
-    document
-        .getElementById(
+    const thankYou =
+        document.getElementById(
             "finaleThankYou"
-        )
-        .classList.add(
-            "show"
         );
-}
-
-
-
-/* =========================================================
-   Special Thanks
-========================================================= */
-
-function showFinaleSpecialThanks() {
-
-    document
-        .getElementById(
-            "finaleThankYou"
-        )
-        .classList.remove(
-            "show"
-        );
-
 
     addFinaleTimer(
         function () {
 
-            document
-                .getElementById(
-                    "finaleSpecialThanks"
-                )
-                .classList.add(
+            if (thankYou) {
+
+                thankYou.classList.add(
                     "show"
                 );
+            }
+
+        },
+        1300
+    );
+}
+
+
+/* =========================================================
+   SPECIAL THANKS
+========================================================= */
+
+function showFinaleSpecialThanks() {
+
+    const thankYou =
+        document.getElementById(
+            "finaleThankYou"
+        );
+
+    const specialThanks =
+        document.getElementById(
+            "finaleSpecialThanks"
+        );
+
+    if (thankYou) {
+
+        thankYou.classList.remove(
+            "show"
+        );
+    }
+
+    addFinaleTimer(
+        function () {
+
+            if (specialThanks) {
+
+                specialThanks.classList.add(
+                    "show"
+                );
+            }
 
         },
         1200
@@ -1246,27 +1351,40 @@ function showFinaleSpecialThanks() {
 }
 
 
-
 /* =========================================================
    フィナーレ開始
+
+   流れ
+
+   ① 写真が散らばって出る
+   ② ♥へ集合
+   ③ ♥完成状態を見せる
+   ④ 同じ写真が★へ変形
+   ⑤ ★完成状態を見せる
+   ⑥ THANK YOU
+   ⑦ Special Thanks
 ========================================================= */
 
 async function startWeddingFinale() {
 
-    if (
-        finaleRunning
-    ) {
+    /*
+       二重スタート防止
+    */
 
+    if (finaleRunning) {
         return;
     }
 
 
-    finaleRunning =
-        true;
+    finaleRunning = true;
 
 
     clearFinaleTimers();
 
+
+    /*
+       フィナーレ画面がなければ作成
+    */
 
     createFinaleScreen();
 
@@ -1289,24 +1407,55 @@ async function startWeddingFinale() {
         );
 
 
-    thankYou.classList.remove(
-        "show"
+    if (!overlay) {
+
+        finaleRunning = false;
+
+        return;
+    }
+
+
+    /* =====================================================
+       前回の状態を完全リセット
+    ===================================================== */
+
+    overlay.classList.remove(
+        "finale-active",
+        "finale-scattered",
+        "finale-heart-assembled",
+        "finale-star-assembled",
+        "finale-star-fade"
     );
 
 
-    specialThanks.classList.remove(
-        "show"
-    );
+    if (thankYou) {
 
+        thankYou.classList.remove(
+            "show"
+        );
+    }
+
+
+    if (specialThanks) {
+
+        specialThanks.classList.remove(
+            "show"
+        );
+    }
+
+
+    /* =====================================================
+       Supabaseから写真取得
+    ===================================================== */
 
     const photos =
         await getFinalePhotos();
 
 
     if (
-        photos.length
-        ===
-        0
+        !photos
+        ||
+        photos.length === 0
     ) {
 
         console.error(
@@ -1314,18 +1463,38 @@ async function startWeddingFinale() {
         );
 
 
-        finaleRunning =
-            false;
-
+        finaleRunning = false;
 
         return;
     }
 
 
+    console.log(
+        "Finale photos:",
+        photos.length
+    );
+
+
+    /* =====================================================
+       写真を作る
+
+       この時点で各写真に
+
+       ・散らばり位置
+       ・♥位置
+       ・★位置
+
+       が設定される
+    ===================================================== */
+
     buildFinalePhotos(
         photos
     );
 
+
+    /* =====================================================
+       通常画面をフィナーレ状態へ
+    ===================================================== */
 
     document.body.classList.add(
         "finale-running"
@@ -1336,6 +1505,10 @@ async function startWeddingFinale() {
         "block";
 
 
+    /*
+       CSSを一度確実に読み直させる
+    */
+
     void overlay.offsetWidth;
 
 
@@ -1344,49 +1517,81 @@ async function startWeddingFinale() {
     );
 
 
-    /* 中央へ集合 */
+    /* =====================================================
+       STEP 1
+
+       写真が画面全体へ
+       バラバラに現れる
+    ===================================================== */
 
     addFinaleTimer(
         function () {
 
-            setFinalePhase(
-                "finale-gather"
-            );
+            showScatteredPhotos();
 
         },
-        250
+        300
     );
 
 
-    /* ハート */
+    /* =====================================================
+       STEP 2
+
+       ♥へ集合開始
+    ===================================================== */
 
     addFinaleTimer(
         function () {
 
-            setFinalePhase(
-                "finale-heart"
-            );
+            assemblePhotoHeart();
 
         },
-        4000
+        1800
     );
 
 
-    /* 星 */
+    /*
+       CSS側で約3.6秒かけて移動。
+
+       1.8秒で集合開始
+            ↓
+       約5.4秒で♥完成
+            ↓
+       約3秒間♥を見せる
+    */
+
+
+    /* =====================================================
+       STEP 3
+
+       ♥ → ★へ変形
+    ===================================================== */
 
     addFinaleTimer(
         function () {
 
-            setFinalePhase(
-                "finale-star"
-            );
+            transformHeartToStar();
 
         },
-        11000
+        8500
     );
 
 
-    /* THANK YOU */
+    /*
+       8.5秒で★への変形開始
+            ↓
+       約12.1秒で★完成
+
+       ★完成後も約4秒見せる
+    */
+
+
+    /* =====================================================
+       STEP 4
+
+       ★を消して
+       THANK YOU
+    ===================================================== */
 
     addFinaleTimer(
         function () {
@@ -1394,11 +1599,15 @@ async function startWeddingFinale() {
             showFinaleThankYou();
 
         },
-        18000
+        16500
     );
 
 
-    /* Special Thanks */
+    /* =====================================================
+       STEP 5
+
+       Special Thanks
+    ===================================================== */
 
     addFinaleTimer(
         function () {
@@ -1406,17 +1615,22 @@ async function startWeddingFinale() {
             showFinaleSpecialThanks();
 
         },
-        25000
+        24500
     );
 }
 
 
-
 /* =========================================================
-   通常画面へ戻す
+   フィナーレ停止
+
+   通常の写真画面へ戻す
 ========================================================= */
 
 function stopWeddingFinale() {
+
+    /*
+       予約中の演出を全部停止
+    */
 
     clearFinaleTimers();
 
@@ -1427,37 +1641,78 @@ function stopWeddingFinale() {
         );
 
 
-    if (
-        overlay
-    ) {
+    if (overlay) {
 
         overlay.classList.remove(
             "finale-active",
-            "finale-gather",
-            "finale-heart",
-            "finale-star"
+            "finale-scattered",
+            "finale-heart-assembled",
+            "finale-star-assembled",
+            "finale-star-fade"
         );
 
 
         overlay.style.display =
             "none";
-
-
-        const stage =
-            document.getElementById(
-                "finalePhotoStage"
-            );
-
-
-        if (
-            stage
-        ) {
-
-            stage.innerHTML =
-                "";
-        }
     }
 
+
+    /*
+       フィナーレ写真を削除
+    */
+
+    const stage =
+        document.getElementById(
+            "finalePhotoStage"
+        );
+
+
+    if (stage) {
+
+        stage.innerHTML =
+            "";
+    }
+
+
+    /*
+       THANK YOUリセット
+    */
+
+    const thankYou =
+        document.getElementById(
+            "finaleThankYou"
+        );
+
+
+    if (thankYou) {
+
+        thankYou.classList.remove(
+            "show"
+        );
+    }
+
+
+    /*
+       Special Thanksリセット
+    */
+
+    const specialThanks =
+        document.getElementById(
+            "finaleSpecialThanks"
+        );
+
+
+    if (specialThanks) {
+
+        specialThanks.classList.remove(
+            "show"
+        );
+    }
+
+
+    /*
+       通常画面を復活
+    */
 
     document.body.classList.remove(
         "finale-running"
@@ -1469,9 +1724,19 @@ function stopWeddingFinale() {
 }
 
 
-
 /* =========================================================
-   Supabase Realtime
+   SUPABASE REALTIME
+
+   管理画面から
+
+   finale_command = start
+
+   が来たら開始。
+
+
+   finale_command = stop
+
+   が来たら通常画面へ戻る。
 ========================================================= */
 
 function startFinaleRealtime() {
@@ -1500,13 +1765,15 @@ function startFinaleRealtime() {
                     "id=eq.main"
             },
 
-            function (
-                payload
-            ) {
+            function (payload) {
 
                 const row =
                     payload.new;
 
+
+                /*
+                   データがない場合
+                */
 
                 if (
                     !row
@@ -1517,6 +1784,11 @@ function startFinaleRealtime() {
                     return;
                 }
 
+
+                /*
+                   同じイベントを
+                   二重で処理しないためのキー
+                */
 
                 const key =
                     row.finale_command
@@ -1544,6 +1816,16 @@ function startFinaleRealtime() {
                     key;
 
 
+                console.log(
+                    "Finale command:",
+                    row.finale_command
+                );
+
+
+                /* =========================================
+                   フィナーレ開始
+                ========================================= */
+
                 if (
                     row.finale_command
                     ===
@@ -1553,6 +1835,10 @@ function startFinaleRealtime() {
                     startWeddingFinale();
                 }
 
+
+                /* =========================================
+                   フィナーレ終了
+                ========================================= */
 
                 if (
                     row.finale_command
@@ -1566,9 +1852,7 @@ function startFinaleRealtime() {
         )
 
         .subscribe(
-            function (
-                status
-            ) {
+            function (status) {
 
                 console.log(
                     "Finale Realtime:",
@@ -1579,31 +1863,44 @@ function startFinaleRealtime() {
 }
 
 
-
 /* =========================================================
-   起動
+   ページ起動時
 ========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
+
     function () {
 
+        /*
+           フィナーレ画面を準備
+        */
+
         createFinaleScreen();
+
+
+        /*
+           管理画面からの
+           start / stop を監視
+        */
 
         startFinaleRealtime();
     }
 );
 
 
-/*
-   後でローカルテストするときは
-   Consoleで
+/* =========================================================
+   ローカル確認用
+
+   ブラウザConsoleで
 
    startWeddingFinale()
 
-   と入力すると開始できます。
+   と入力するとフィナーレ開始。
+
 
    戻す場合は
 
    stopWeddingFinale()
-*/
+
+========================================================= */

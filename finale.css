@@ -1,95 +1,79 @@
 /* =========================================================
-   PHOTO SHUSHU
-   Wedding Finale
-   ハート → 星 → THANK YOU
+   MEMORY FLOW
+   WEDDING FINALE
+
+   SCATTER
+      ↓
+   HEART ♥
+      ↓
+   STAR ★
+      ↓
+   THANK YOU
 ========================================================= */
 
 
-/* ========================================
-   フィナーレ画面全体
-======================================== */
+/* =========================================================
+   フィナーレ中は通常画面を隠す
+========================================================= */
+
+body.finale-running #photoWall,
+body.finale-running .wedding-title {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+
+/* =========================================================
+   フィナーレ背景
+========================================================= */
 
 #finaleOverlay {
+    position: fixed;
 
-    position:
-        fixed;
+    inset: 0;
 
-    inset:
-        0;
+    z-index: 2000000;
 
-    z-index:
-        2000000;
+    display: none;
 
-    display:
-        none;
+    overflow: hidden;
 
-    overflow:
-        hidden;
-
-    opacity:
-        0;
-
-    pointer-events:
-        none;
+    opacity: 0;
 
     background:
-
         radial-gradient(
-            circle at center,
-            rgba(20, 48, 105, 0.94) 0%,
-            rgba(5, 22, 62, 0.98) 58%,
-            rgba(1, 7, 24, 1) 100%
+            circle at 50% 46%,
+            #17396d 0%,
+            #0c2b5e 36%,
+            #061a3e 68%,
+            #01091d 100%
         );
+
+    transition:
+        opacity 1.2s ease;
 }
 
 
 #finaleOverlay.finale-active {
-
-    display:
-        block;
-
-    opacity:
-        1;
-
-    pointer-events:
-        auto;
-
-    animation:
-
-        finaleFadeIn
-        1.2s
-        ease
-        forwards;
+    opacity: 1;
 }
 
 
-
-/* ========================================
-   中央の淡いゴールド光
-======================================== */
+/* =========================================================
+   中央の柔らかい光
+========================================================= */
 
 .finale-glow {
+    position: absolute;
 
-    position:
-        absolute;
+    left: 50%;
+    top: 50%;
 
-    left:
-        50%;
+    width: 82vw;
+    height: 82vw;
 
-    top:
-        50%;
-
-    width:
-        75vw;
-
-    height:
-        75vw;
-
-    max-width:
-        1000px;
-
-    max-height:
-        1000px;
+    max-width: 1250px;
+    max-height: 1250px;
 
     transform:
         translate(
@@ -97,147 +81,240 @@
             -50%
         );
 
-    border-radius:
-        50%;
+    border-radius: 50%;
 
     background:
-
         radial-gradient(
             circle,
-            rgba(255, 220, 130, 0.20) 0%,
-            rgba(255, 210, 110, 0.07) 36%,
-            rgba(255, 210, 110, 0) 70%
+
+            rgba(
+                255,
+                239,
+                177,
+                0.15
+            )
+            0%,
+
+            rgba(
+                100,
+                151,
+                230,
+                0.08
+            )
+            38%,
+
+            rgba(
+                0,
+                0,
+                0,
+                0
+            )
+            72%
         );
 
-    animation:
+    filter:
+        blur(16px);
 
-        finaleGlowPulse
-        3s
-        ease-in-out
-        infinite;
+    pointer-events: none;
 }
 
 
+/* =========================================================
+   写真が動くステージ
 
-/* ========================================
-   写真ステージ
-======================================== */
+   ♥と★が歪まないように
+   正方形の領域を使う
+========================================================= */
 
-#finalePhotoStage {
+.finale-photo-stage {
+    position: absolute;
 
-    position:
-        absolute;
+    left: 50%;
+    top: 50%;
 
-    inset:
-        0;
+    width:
+        min(
+            80vw,
+            84vh
+        );
 
-    z-index:
-        20;
+    aspect-ratio:
+        1 / 1;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
+
+    pointer-events: none;
+
+    z-index: 10;
 }
 
 
+/* =========================================================
+   写真1枚
 
-/* ========================================
-   フィナーレ写真
-======================================== */
+   写真そのものは★や♥に切り抜かない。
+
+   四角い写真のまま
+   「中心位置」だけを移動させる。
+========================================================= */
 
 .finale-photo {
+    position: absolute;
 
-    position:
-        absolute;
+    /*
+       最初の散らばり位置
+    */
 
     left:
-        50%;
+        var(
+            --start-x
+        );
 
     top:
-        50%;
+        var(
+            --start-y
+        );
+
+
+    /*
+       JS側で写真ごとに
+       少しサイズ差をつけている
+    */
 
     width:
         var(
-            --pw,
-            60px
+            --photo-width
         );
 
     height:
         var(
-            --ph,
-            44px
+            --photo-height
         );
 
-    object-fit:
-        cover;
 
-    padding:
-        2px;
+    object-fit: cover;
 
-    background:
-        white;
+    display: block;
 
-    border-radius:
-        2px;
+    box-sizing: border-box;
 
-    box-shadow:
 
-        0 0 10px
+    /*
+       写真らしい白枠
+    */
+
+    border:
+        2px solid
         rgba(
             255,
-            235,
-            180,
+            255,
+            255,
+            0.96
+        );
+
+    border-radius:
+        4px;
+
+
+    /*
+       柔らかい光
+    */
+
+    box-shadow:
+        0 2px 8px
+        rgba(
+            0,
+            0,
+            0,
+            0.28
+        ),
+
+        0 0 8px
+        rgba(
+            255,
+            255,
+            255,
             0.55
         ),
 
-        0 5px 14px
+        0 0 18px
         rgba(
-            0,
-            0,
-            0,
-            0.35
+            232,
+            199,
+            111,
+            0.18
         );
 
-    opacity:
-        0;
+
+    /*
+       最初は見えない
+    */
+
+    opacity: 0;
+
+
+    /*
+       最初は少し小さく
+       少し傾いている
+    */
 
     transform:
-
         translate(
             -50%,
             -50%
         )
+        scale(0.42)
+        rotate(
+            var(
+                --start-rotation
+            )
+        );
 
-        scale(0.2);
+
+    /*
+       ♥にも★にも
+       この移動時間を使う。
+
+       ♥→★の時も同じ写真が
+       スーッと移動する。
+    */
 
     transition:
+        left 3.6s
+            cubic-bezier(
+                0.18,
+                0.78,
+                0.16,
+                1
+            )
+            var(--move-delay),
 
-        left
-        2.8s
-        cubic-bezier(
-            0.22,
-            0.61,
-            0.36,
-            1
-        ),
+        top 3.6s
+            cubic-bezier(
+                0.18,
+                0.78,
+                0.16,
+                1
+            )
+            var(--move-delay),
 
-        top
-        2.8s
-        cubic-bezier(
-            0.22,
-            0.61,
-            0.36,
-            1
-        ),
+        transform 3.6s
+            cubic-bezier(
+                0.18,
+                0.78,
+                0.16,
+                1
+            )
+            var(--move-delay),
 
-        transform
-        2.8s
-        cubic-bezier(
-            0.22,
-            0.61,
-            0.36,
-            1
-        ),
+        opacity 1s ease,
 
-        opacity
-        1.2s
-        ease;
+        filter 1.5s ease;
+
 
     will-change:
         left,
@@ -247,332 +324,395 @@
 }
 
 
-.finale-photo.visible {
+/* =========================================================
+   STEP 1
 
-    opacity:
-        1;
-}
+   写真が画面中にふわっと現れる
+========================================================= */
 
-
-
-/* ========================================
-   写真が中央へ集合
-======================================== */
-
-#finaleOverlay.finale-gather
+#finaleOverlay.finale-scattered
 .finale-photo {
 
-    left:
-        calc(
-            50%
-            +
-            var(--gx)
-        );
-
-    top:
-        calc(
-            50%
-            +
-            var(--gy)
-        );
+    opacity: 0.90;
 
     transform:
-
         translate(
             -50%,
             -50%
         )
-
+        scale(0.76)
         rotate(
-            var(--gr)
-        )
-
-        scale(0.86);
+            var(
+                --start-rotation
+            )
+        );
 }
 
 
+/* =========================================================
+   STEP 2
 
-/* ========================================
-   ハート
-======================================== */
+   ♥へ集合
 
-#finaleOverlay.finale-heart
+   JSで作った
+   --heart-x
+   --heart-y
+
+   に移動する。
+========================================================= */
+
+#finaleOverlay.finale-heart-assembled
 .finale-photo {
 
     left:
-        var(--hx);
+        var(
+            --heart-x
+        );
 
     top:
-        var(--hy);
+        var(
+            --heart-y
+        );
+
+    opacity: 1;
 
     transform:
-
         translate(
             -50%,
             -50%
         )
-
-        rotate(0deg)
-
-        scale(1);
+        scale(1)
+        rotate(0deg);
 }
 
 
+/* =========================================================
+   ♥完成時
 
-/* ========================================
-   星
-======================================== */
+   写真が少し光る。
 
-#finaleOverlay.finale-star
+   派手すぎないように
+   白＋ゴールドの光。
+========================================================= */
+
+#finaleOverlay.finale-heart-assembled
 .finale-photo {
-
-    left:
-        var(--sx);
-
-    top:
-        var(--sy);
-
-    transform:
-
-        translate(
-            -50%,
-            -50%
-        )
-
-        rotate(0deg)
-
-        scale(1);
-}
-
-
-
-/* ========================================
-   写真フェードアウト
-======================================== */
-
-.finale-photo.fade {
-
-    opacity:
-        0 !important;
-}
-
-
-
-/* ========================================
-   星のキラキラ
-======================================== */
-
-.finale-sparkle {
-
-    position:
-        absolute;
-
-    z-index:
-        60;
-
-    left:
-        var(--sl);
-
-    top:
-        var(--st);
-
-    width:
-        var(--ss);
-
-    height:
-        var(--ss);
-
-    opacity:
-        0;
-
-    pointer-events:
-        none;
-
-    transform:
-
-        translate(
-            -50%,
-            -50%
-        )
-
-        rotate(45deg);
-
-    background:
-        white;
 
     box-shadow:
+        0 2px 8px
+        rgba(
+            0,
+            0,
+            0,
+            0.25
+        ),
 
         0 0 8px
-        white,
+        rgba(
+            255,
+            255,
+            255,
+            0.70
+        ),
+
+        0 0 16px
+        rgba(
+            232,
+            199,
+            111,
+            0.25
+        );
+}
+
+
+/* =========================================================
+   STEP 3
+
+   ♥ → ★
+
+   写真を消さない。
+
+   同じ写真が
+   --star-x
+   --star-y
+
+   へ直接移動する。
+========================================================= */
+
+#finaleOverlay.finale-star-assembled
+.finale-photo {
+
+    left:
+        var(
+            --star-x
+        );
+
+    top:
+        var(
+            --star-y
+        );
+
+    opacity: 1;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        )
+        scale(1)
+        rotate(0deg);
+
+    box-shadow:
+        0 2px 8px
+        rgba(
+            0,
+            0,
+            0,
+            0.25
+        ),
+
+        0 0 9px
+        rgba(
+            255,
+            255,
+            255,
+            0.78
+        ),
 
         0 0 20px
         rgba(
-            255,
-            220,
-            120,
-            0.90
-        ),
+            232,
+            199,
+            111,
+            0.30
+        );
+}
 
-        0 0 32px
+
+/* =========================================================
+   ★終了
+
+   THANK YOUへ切り替える前に
+   ★全体をふわっと消す
+========================================================= */
+
+#finaleOverlay.finale-star-fade
+.finale-photo {
+
+    opacity: 0 !important;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        )
+        scale(0.82)
+        rotate(0deg);
+
+    filter:
+        blur(4px);
+
+    transition:
+        opacity 1.5s ease,
+        transform 1.5s ease,
+        filter 1.5s ease;
+}
+
+
+/* =========================================================
+   背景キラキラ
+========================================================= */
+
+.finale-sparkle {
+    position: absolute;
+
+    left:
+        var(
+            --sparkle-left
+        );
+
+    top:
+        var(
+            --sparkle-top
+        );
+
+    width:
+        var(
+            --sparkle-size
+        );
+
+    height:
+        var(
+            --sparkle-size
+        );
+
+    z-index: 5;
+
+    pointer-events: none;
+
+    border-radius: 50%;
+
+    background:
+        #fff9dc;
+
+    opacity: 0.2;
+
+    box-shadow:
+        0 0 7px
         rgba(
             255,
-            205,
-            90,
-            0.45
+            255,
+            255,
+            0.95
+        ),
+
+        0 0 16px
+        rgba(
+            241,
+            208,
+            119,
+            0.82
         );
 
     animation:
-
         finaleTwinkle
-
-        var(--sd)
-
+        var(
+            --sparkle-duration
+        )
         ease-in-out
-
-        var(--sdelay)
-
+        var(
+            --sparkle-delay
+        )
         infinite;
 }
 
 
+/* =========================================================
+   十字キラキラ
+========================================================= */
+
 .finale-sparkle::before,
 .finale-sparkle::after {
 
-    content:
-        "";
+    content: "";
 
-    position:
-        absolute;
+    position: absolute;
 
-    left:
-        50%;
-
-    top:
-        50%;
-
-    background:
-        rgba(
-            255,
-            250,
-            230,
-            0.95
-        );
+    left: 50%;
+    top: 50%;
 
     transform:
         translate(
             -50%,
             -50%
+        );
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.95
         );
 }
 
 
 .finale-sparkle::before {
 
-    width:
-        1px;
-
-    height:
-        300%;
+    width: 1px;
+    height: 340%;
 }
 
 
 .finale-sparkle::after {
 
-    width:
-        300%;
-
-    height:
-        1px;
+    width: 340%;
+    height: 1px;
 }
 
 
+/* =========================================================
+   キラキラアニメーション
+========================================================= */
 
-/* ========================================
-   メッセージ画面
-======================================== */
+@keyframes finaleTwinkle {
+
+    0%,
+    100% {
+
+        opacity: 0.15;
+
+        transform:
+            scale(0.55);
+    }
+
+
+    50% {
+
+        opacity: 1;
+
+        transform:
+            scale(1.35);
+    }
+}
+
+
+/* =========================================================
+   THANK YOU / Special Thanks 共通
+========================================================= */
 
 .finale-message {
 
-    position:
-        absolute;
+    position: absolute;
 
-    inset:
-        0;
+    left: 50%;
+    top: 50%;
 
-    z-index:
-        100;
+    z-index: 50;
 
-    display:
-        flex;
+    width: 90%;
 
-    flex-direction:
-        column;
+    text-align: center;
 
-    justify-content:
-        center;
+    color: white;
 
-    align-items:
-        center;
+    opacity: 0;
 
-    text-align:
-        center;
-
-    color:
-        white;
-
-    opacity:
-        0;
+    pointer-events: none;
 
     transform:
+        translate(
+            -50%,
+            -46%
+        )
         scale(0.94);
 
     transition:
-
-        opacity
-        1.5s
-        ease,
-
-        transform
-        1.5s
-        ease;
-
-    pointer-events:
-        none;
-
-    text-shadow:
-
-        0 3px 12px
-        rgba(
-            0,
-            0,
-            0,
-            0.55
-        ),
-
-        0 0 30px
-        rgba(
-            255,
-            220,
-            130,
-            0.28
-        );
+        opacity 1.5s ease,
+        transform 1.5s ease;
 }
 
 
+/* =========================================================
+   メッセージ表示
+========================================================= */
+
 .finale-message.show {
 
-    opacity:
-        1;
+    opacity: 1;
 
     transform:
+        translate(
+            -50%,
+            -50%
+        )
         scale(1);
 }
 
 
-
-/* ========================================
+/* =========================================================
    THANK YOU
-======================================== */
+========================================================= */
 
 .finale-thankyou-main {
 
@@ -582,25 +722,46 @@
         serif;
 
     font-size:
-
         clamp(
-            58px,
-            9vw,
-            140px
+            48px,
+            7vw,
+            120px
         );
 
+    font-weight: 700;
+
     letter-spacing:
-        7px;
+        0.12em;
 
     color:
-        #fff7df;
+        #fffdf4;
+
+    text-shadow:
+        0 0 12px
+        rgba(
+            255,
+            255,
+            255,
+            0.40
+        ),
+
+        0 0 28px
+        rgba(
+            224,
+            184,
+            78,
+            0.30
+        );
 }
 
 
+/* =========================================================
+   名前
+========================================================= */
+
 .finale-thankyou-names {
 
-    margin-top:
-        22px;
+    margin-top: 25px;
 
     font-family:
         Georgia,
@@ -608,77 +769,95 @@
         serif;
 
     font-size:
-
         clamp(
-            27px,
-            4vw,
-            58px
+            25px,
+            3vw,
+            50px
         );
 
     letter-spacing:
-        4px;
+        0.11em;
 
     color:
-        #ffe5a4;
+        #e9cb78;
 }
 
+
+/* =========================================================
+   日付
+========================================================= */
+
+.finale-thankyou-date {
+
+    margin-top: 17px;
+
+    font-size:
+        clamp(
+            16px,
+            1.7vw,
+            27px
+        );
+
+    letter-spacing:
+        0.22em;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.86
+        );
+}
+
+
+/* =========================================================
+   金色の区切り線
+========================================================= */
 
 .finale-divider {
 
     width:
-
         min(
-            360px,
-            56vw
+            330px,
+            42vw
         );
 
-    height:
-        1px;
+    height: 1px;
 
     margin:
-
-        26px
-        auto
-        20px;
+        25px auto 0;
 
     background:
-
         linear-gradient(
-            to right,
+            90deg,
+
             transparent,
-            #ffe2a0,
+
+            rgba(
+                229,
+                195,
+                105,
+                0.95
+            ),
+
             transparent
         );
-}
 
-
-.finale-thankyou-date {
-
-    font-family:
-        Georgia,
-        "Times New Roman",
-        serif;
-
-    font-size:
-
-        clamp(
-            22px,
-            2.8vw,
-            38px
+    box-shadow:
+        0 0 9px
+        rgba(
+            229,
+            195,
+            105,
+            0.35
         );
-
-    letter-spacing:
-        6px;
-
-    color:
-        #fff3d4;
 }
 
 
-
-/* ========================================
-   Special Thanks
-======================================== */
+/* =========================================================
+   SPECIAL THANKS
+========================================================= */
 
 .finale-special-title {
 
@@ -687,235 +866,97 @@
         "Times New Roman",
         serif;
 
-    font-style:
-        italic;
-
     font-size:
-
         clamp(
-            54px,
-            8vw,
-            120px
+            42px,
+            6vw,
+            92px
         );
 
+    font-style: italic;
+
     color:
-        #ffe8b1;
+        #e8ca78;
+
+    text-shadow:
+        0 0 20px
+        rgba(
+            221,
+            181,
+            75,
+            0.25
+        );
 }
 
 
+/* =========================================================
+   Special Thanks 日本語
+========================================================= */
+
 .finale-special-text {
 
-    margin-top:
-        32px;
+    margin-top: 35px;
+
+    font-family:
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        serif;
 
     font-size:
-
         clamp(
             20px,
-            2.2vw,
-            34px
+            2.3vw,
+            36px
         );
 
-    line-height:
-        2;
+    line-height: 2;
 
     letter-spacing:
-        2px;
+        0.09em;
 
     color:
         rgba(
             255,
             255,
             255,
-            0.96
+            0.95
         );
 }
 
 
-
-/* ========================================
-   フィナーレ中は通常写真を消す
-======================================== */
-
-body.finale-running
-.wedding-title,
-
-body.finale-running
-#photoWall {
-
-    opacity:
-        0;
-
-    transition:
-
-        opacity
-        1.2s
-        ease;
-}
-
-
-
-/* ========================================
-   フェードイン
-======================================== */
-
-@keyframes finaleFadeIn {
-
-    from {
-
-        opacity:
-            0;
-    }
-
-
-    to {
-
-        opacity:
-            1;
-    }
-}
-
-
-
-/* ========================================
-   背景の光
-======================================== */
-
-@keyframes finaleGlowPulse {
-
-    0%,
-    100% {
-
-        opacity:
-            0.55;
-
-        transform:
-
-            translate(
-                -50%,
-                -50%
-            )
-
-            scale(0.94);
-    }
-
-
-    50% {
-
-        opacity:
-            1;
-
-        transform:
-
-            translate(
-                -50%,
-                -50%
-            )
-
-            scale(1.06);
-    }
-}
-
-
-
-/* ========================================
-   キラキラ
-======================================== */
-
-@keyframes finaleTwinkle {
-
-    0%,
-    100% {
-
-        opacity:
-            0;
-
-        transform:
-
-            translate(
-                -50%,
-                -50%
-            )
-
-            rotate(45deg)
-
-            scale(0.3);
-    }
-
-
-    45% {
-
-        opacity:
-            1;
-
-        transform:
-
-            translate(
-                -50%,
-                -50%
-            )
-
-            rotate(45deg)
-
-            scale(1.35);
-    }
-
-
-    65% {
-
-        opacity:
-            0.75;
-
-        transform:
-
-            translate(
-                -50%,
-                -50%
-            )
-
-            rotate(45deg)
-
-            scale(0.85);
-    }
-}
-
-
-
-/* ========================================
-   スマホ
-======================================== */
+/* =========================================================
+   小さい画面
+========================================================= */
 
 @media (
     max-width: 700px
 ) {
 
+    .finale-photo-stage {
+
+        width:
+            min(
+                94vw,
+                76vh
+            );
+    }
+
+
     .finale-photo {
 
-        padding:
-            1px;
+        border-width: 1px;
     }
 
 
     .finale-thankyou-main {
 
         letter-spacing:
-            3px;
-    }
-
-
-    .finale-thankyou-names {
-
-        letter-spacing:
-            2px;
+            0.07em;
     }
 
 
     .finale-special-text {
 
-        padding:
-            0 24px;
-
-        line-height:
-            1.75;
+        line-height: 1.8;
     }
 }

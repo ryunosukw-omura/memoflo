@@ -1,5 +1,5 @@
 // ========================================
-// PHOTO SHUSHU
+// MEMORY FLOW
 // Wedding Photo Wall
 // 左 → 右
 // 最新200枚
@@ -1770,7 +1770,7 @@ async function initializePhotoWall() {
 
 
     console.log(
-        "PHOTO SHUSHU START"
+        "MEMORY FLOW START"
     );
 
 
@@ -1784,7 +1784,7 @@ async function initializePhotoWall() {
 
 
     console.log(
-        "PHOTO SHUSHU READY"
+        "MEMORY FLOW READY"
     );
 }
 
