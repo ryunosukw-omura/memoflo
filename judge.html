@@ -454,13 +454,20 @@ Wedding Finale
 </button>
 
 <button
+    id="shareSelectedButton"
+    class="share-button"
+    type="button"
+>
+↗ 選択写真をシェア
+</button>
+
+<button
     id="deleteSelectedButton"
     class="delete-selected-button"
     type="button"
 >
 🗑 選択写真を削除
 </button>
-
 </div>
 
 </div>
@@ -527,6 +534,9 @@ const unselectAllButton =
 
 const downloadSelectedButton =
     document.getElementById("downloadSelectedButton");
+
+const shareSelectedButton =
+    document.getElementById("shareSelectedButton");
 
 const deleteSelectedButton =
     document.getElementById("deleteSelectedButton");
@@ -1883,7 +1893,120 @@ async function deleteSinglePhoto(
 /* ========================================
    選択写真削除
 ======================================== */
+/* =========================================
+   選択写真をシェア（最大10枚）
+========================================= */
 
+shareSelectedButton.addEventListener(
+    "click",
+    shareSelectedPhotos
+);
+
+async function shareSelectedPhotos() {
+
+    const photos = currentPhotos.filter(
+        photo => selectedPhotoIds.has(photo.id)
+    );
+
+    if (photos.length === 0) {
+        alert("シェアする写真を選択してください。");
+        return;
+    }
+
+    if (photos.length > 10) {
+        alert("シェアできる写真は一度に10枚までです。");
+        return;
+    }
+
+    if (!navigator.share) {
+        alert("この端末・ブラウザでは共有機能を利用できません。");
+        return;
+    }
+
+    try {
+
+        status.className = "";
+        status.textContent =
+            "シェア用の写真を準備しています…";
+
+        const files = [];
+
+        for (let i = 0; i < photos.length; i++) {
+
+            const photo = photos[i];
+
+            const response = await fetch(photo.url);
+
+            if (!response.ok) {
+                throw new Error("画像の取得に失敗しました");
+            }
+
+            const blob = await response.blob();
+
+            let extension = "jpg";
+
+            if (blob.type.includes("png")) {
+                extension = "png";
+            } else if (blob.type.includes("webp")) {
+                extension = "webp";
+            } else if (blob.type.includes("gif")) {
+                extension = "gif";
+            }
+
+            const file = new File(
+                [blob],
+                `memory-flow-${i + 1}.${extension}`,
+                {
+                    type: blob.type || "image/jpeg"
+                }
+            );
+
+            files.push(file);
+        }
+
+        const shareData = {
+            files: files
+        };
+
+        if (
+            navigator.canShare &&
+            !navigator.canShare(shareData)
+        ) {
+            alert(
+                "この端末では選択した写真をまとめて共有できません。"
+            );
+
+            status.textContent = "";
+            return;
+        }
+
+        await navigator.share(shareData);
+
+        status.className = "success";
+        status.textContent =
+            `${files.length}枚の写真を共有しました。`;
+
+    } catch (error) {
+
+        /*
+           共有画面を自分で閉じた場合は
+           エラー表示しない
+        */
+        if (error.name === "AbortError") {
+            status.textContent = "";
+            return;
+        }
+
+        console.error(
+            "写真シェアエラー:",
+            error
+        );
+
+        status.className = "error";
+        status.textContent =
+            "写真をシェアできませんでした。";
+    }
+}
 deleteSelectedButton.addEventListener(
     "click",
     deleteSelectedPhotos
