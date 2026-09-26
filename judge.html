@@ -1938,7 +1938,7 @@ async function shareSelectedPhotos() {
 
             const photo = photos[i];
 
-            const response = await fetch(photo.url);
+            const response = await fetch(photo.image_url);
 
             if (!response.ok) {
                 throw new Error("画像の取得に失敗しました");
