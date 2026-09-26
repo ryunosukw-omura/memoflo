@@ -1233,11 +1233,14 @@ function updateSelectionCount() {
         "枚選択中";
 
 
-    downloadSelectedButton.disabled =
-        selectedPhotoIds.size === 0;
+downloadSelectedButton.disabled =
+    selectedPhotoIds.size === 0;
 
-    deleteSelectedButton.disabled =
-        selectedPhotoIds.size === 0;
+shareSelectedButton.disabled =
+    selectedPhotoIds.size === 0;
+
+deleteSelectedButton.disabled =
+    selectedPhotoIds.size === 0;
 }
 
 
@@ -2002,9 +2005,9 @@ async function shareSelectedPhotos() {
             error
         );
 
-        status.className = "error";
-        status.textContent =
-            "写真をシェアできませんでした。";
+status.className = "error";
+status.textContent =
+    "共有エラー：" + error.name + " / " + error.message;
     }
 }
 deleteSelectedButton.addEventListener(
