@@ -1,6 +1,10 @@
 /* ========================================
    MEMORY FLOW
    Navy Blue Wedding Version
+
+   写真ビューアー
+   保存・シェア
+   最大10枚選択対応
 ======================================== */
 
 
@@ -74,7 +78,6 @@ body {
     position: fixed;
 
     top: 22px;
-
     left: 50%;
 
     transform:
@@ -170,7 +173,7 @@ body {
 
 
 /* ========================================
-   タイトルを見やすくする薄い影
+   タイトル上部の薄い影
 ======================================== */
 
 .wedding-title::before {
@@ -259,6 +262,18 @@ body {
 
     opacity:
         0;
+
+    cursor:
+        pointer;
+
+    user-select:
+        none;
+
+    -webkit-user-drag:
+        none;
+
+    -webkit-tap-highlight-color:
+        transparent;
 
     will-change:
         left,
@@ -470,15 +485,9 @@ body {
 
 
 /* ========================================
-   新着写真のキラキラ 最終仕上げ
+   新着写真のキラキラ
 
    SILVER / WHITE / SOFT GOLD
-
-   ・シルバー中心
-   ・白
-   ・淡いゴールドを少量
-   ・丸い光の玉は出さない
-   ・細い十字型の光だけ
 ======================================== */
 
 .photo-sparkle {
@@ -494,9 +503,6 @@ body {
     color:
         #e3e8ee;
 
-    /*
-       丸い光を完全になくす
-    */
     background:
         transparent !important;
 
@@ -515,9 +521,6 @@ body {
     box-shadow:
         none !important;
 
-    /*
-       光の輪郭だけを柔らかくする
-    */
     filter:
         drop-shadow(
             0 0 3px
@@ -577,9 +580,7 @@ body {
 }
 
 
-/* ========================================
-   縦の細い光
-======================================== */
+/* 縦 */
 
 .photo-sparkle::before {
     width:
@@ -590,9 +591,7 @@ body {
 }
 
 
-/* ========================================
-   横の細い光
-======================================== */
+/* 横 */
 
 .photo-sparkle::after {
     width:
@@ -601,8 +600,10 @@ body {
     height:
         1px;
 }
+
+
 /* ========================================
-   上品なキラキラアニメーション
+   キラキラアニメーション
 ======================================== */
 
 @keyframes elegantWeddingSparkle {
@@ -620,7 +621,6 @@ body {
             rotate(0deg);
     }
 
-
     18% {
         opacity:
             0.95;
@@ -629,19 +629,16 @@ body {
             translate(
                 calc(
                     var(--sparkle-x)
-                    *
-                    0.08
+                    * 0.08
                 ),
                 calc(
                     var(--sparkle-y)
-                    *
-                    0.08
+                    * 0.08
                 )
             )
             scale(1.05)
             rotate(8deg);
     }
-
 
     45% {
         opacity:
@@ -651,19 +648,16 @@ body {
             translate(
                 calc(
                     var(--sparkle-x)
-                    *
-                    0.38
+                    * 0.38
                 ),
                 calc(
                     var(--sparkle-y)
-                    *
-                    0.38
+                    * 0.38
                 )
             )
             scale(0.82)
             rotate(17deg);
     }
-
 
     72% {
         opacity:
@@ -673,19 +667,16 @@ body {
             translate(
                 calc(
                     var(--sparkle-x)
-                    *
-                    0.72
+                    * 0.72
                 ),
                 calc(
                     var(--sparkle-y)
-                    *
-                    0.72
+                    * 0.72
                 )
             )
             scale(0.58)
             rotate(25deg);
     }
-
 
     100% {
         opacity:
@@ -703,6 +694,814 @@ body {
 
 
 /* ========================================
+   選択モード
+
+   選択された写真
+======================================== */
+
+.mf-selection-mode
+.photo {
+    cursor:
+        pointer;
+}
+
+.photo.mf-selected {
+    outline:
+        5px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.98
+        );
+
+    outline-offset:
+        4px;
+
+    box-shadow:
+        0 0 0 9px
+        rgba(
+            205,
+            216,
+            230,
+            0.85
+        ),
+
+        0 15px 40px
+        rgba(
+            0,
+            0,
+            0,
+            0.50
+        );
+
+    z-index:
+        4500;
+}
+
+
+/* ========================================
+   写真拡大ビューアー
+======================================== */
+
+#memoryFlowViewer {
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    z-index:
+        20000;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    visibility:
+        hidden;
+
+    opacity:
+        0;
+
+    pointer-events:
+        none;
+
+    transition:
+        opacity 0.25s ease,
+        visibility 0.25s ease;
+}
+
+#memoryFlowViewer.open {
+    visibility:
+        visible;
+
+    opacity:
+        1;
+
+    pointer-events:
+        auto;
+}
+
+
+/* ========================================
+   ビューアー背景
+======================================== */
+
+.mf-viewer-backdrop {
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    background:
+        rgba(
+            2,
+            12,
+            35,
+            0.88
+        );
+
+    backdrop-filter:
+        blur(9px);
+
+    -webkit-backdrop-filter:
+        blur(9px);
+}
+
+
+/* ========================================
+   ビューアー本体
+======================================== */
+
+.mf-viewer-content {
+    position:
+        relative;
+
+    z-index:
+        2;
+
+    width:
+        min(
+            94vw,
+            900px
+        );
+
+    max-height:
+        94vh;
+
+    padding:
+        22px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.25
+        );
+
+    border-radius:
+        20px;
+
+    background:
+        rgba(
+            7,
+            26,
+            67,
+            0.94
+        );
+
+    box-shadow:
+        0 30px 100px
+        rgba(
+            0,
+            0,
+            0,
+            0.55
+        );
+
+    transform:
+        scale(0.94);
+
+    transition:
+        transform 0.25s ease;
+}
+
+#memoryFlowViewer.open
+.mf-viewer-content {
+    transform:
+        scale(1);
+}
+
+
+/* ========================================
+   拡大画像
+======================================== */
+
+.mf-viewer-image-area {
+    width:
+        100%;
+
+    height:
+        min(
+            68vh,
+            650px
+        );
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    overflow:
+        hidden;
+
+    border-radius:
+        12px;
+
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            0.28
+        );
+}
+
+.mf-viewer-image {
+    display:
+        block;
+
+    max-width:
+        100%;
+
+    max-height:
+        100%;
+
+    width:
+        auto;
+
+    height:
+        auto;
+
+    object-fit:
+        contain;
+
+    background:
+        white;
+
+    border:
+        7px solid white;
+
+    border-radius:
+        3px;
+
+    box-shadow:
+        0 18px 50px
+        rgba(
+            0,
+            0,
+            0,
+            0.42
+        );
+}
+
+
+/* ========================================
+   閉じるボタン
+======================================== */
+
+.mf-close-button {
+    position:
+        absolute;
+
+    top:
+        -14px;
+
+    right:
+        -14px;
+
+    z-index:
+        10;
+
+    width:
+        44px;
+
+    height:
+        44px;
+
+    padding:
+        0;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.35
+        );
+
+    border-radius:
+        50%;
+
+    background:
+        rgba(
+            7,
+            26,
+            67,
+            0.98
+        );
+
+    color:
+        white;
+
+    font-size:
+        30px;
+
+    line-height:
+        40px;
+
+    cursor:
+        pointer;
+
+    box-shadow:
+        0 8px 24px
+        rgba(
+            0,
+            0,
+            0,
+            0.35
+        );
+}
+/* ========================================
+   ビューアー下のボタン
+======================================== */
+
+.mf-viewer-actions {
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    margin-top:
+        18px;
+
+    flex-wrap:
+        wrap;
+}
+
+.mf-action-button {
+    min-height:
+        48px;
+
+    padding:
+        12px 20px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.35
+        );
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.12
+        );
+
+    color:
+        white;
+
+    font-size:
+        15px;
+
+    font-weight:
+        600;
+
+    letter-spacing:
+        0.4px;
+
+    cursor:
+        pointer;
+
+    -webkit-tap-highlight-color:
+        transparent;
+
+    transition:
+        transform 0.15s ease,
+        background 0.15s ease;
+}
+
+.mf-action-button:active {
+    transform:
+        scale(0.96);
+}
+
+.mf-primary-button {
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.95
+        );
+
+    color:
+        #08255e;
+
+    border-color:
+        white;
+}
+
+
+/* ========================================
+   複数選択バー
+======================================== */
+
+#mfSelectionBar {
+    position:
+        fixed;
+
+    left:
+        50%;
+
+    bottom:
+        20px;
+
+    transform:
+        translate(
+            -50%,
+            140%
+        );
+
+    width:
+        min(
+            94vw,
+            850px
+        );
+
+    z-index:
+        18000;
+
+    opacity:
+        0;
+
+    visibility:
+        hidden;
+
+    transition:
+        transform 0.28s ease,
+        opacity 0.28s ease,
+        visibility 0.28s ease;
+}
+
+#mfSelectionBar.open {
+    transform:
+        translate(
+            -50%,
+            0
+        );
+
+    opacity:
+        1;
+
+    visibility:
+        visible;
+}
+
+.mf-selection-inner {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        15px;
+
+    padding:
+        13px 15px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.28
+        );
+
+    border-radius:
+        18px;
+
+    background:
+        rgba(
+            4,
+            23,
+            63,
+            0.94
+        );
+
+    backdrop-filter:
+        blur(12px);
+
+    -webkit-backdrop-filter:
+        blur(12px);
+
+    box-shadow:
+        0 18px 50px
+        rgba(
+            0,
+            0,
+            0,
+            0.42
+        );
+
+    color:
+        white;
+}
+
+
+/* ========================================
+   選択枚数
+======================================== */
+
+.mf-selection-info {
+    display:
+        flex;
+
+    align-items:
+        baseline;
+
+    white-space:
+        nowrap;
+
+    padding-left:
+        5px;
+}
+
+#mfSelectionCount {
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size:
+        27px;
+
+    margin-right:
+        4px;
+}
+
+.mf-selection-info span {
+    font-size:
+        13px;
+
+    opacity:
+        0.82;
+}
+
+
+/* ========================================
+   選択バーのボタン
+======================================== */
+
+.mf-selection-actions {
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        flex-end;
+
+    gap:
+        8px;
+}
+
+.mf-selection-button {
+    min-height:
+        42px;
+
+    padding:
+        9px 15px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.30
+        );
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.10
+        );
+
+    color:
+        white;
+
+    font-size:
+        13px;
+
+    font-weight:
+        600;
+
+    cursor:
+        pointer;
+
+    -webkit-tap-highlight-color:
+        transparent;
+}
+
+.mf-selection-button:disabled {
+    opacity:
+        0.35;
+
+    cursor:
+        default;
+}
+
+.mf-share-selected {
+    background:
+        white;
+
+    color:
+        #08255e;
+}
+
+.mf-cancel-selection {
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            0.20
+        );
+}
+
+
+/* ========================================
+   メッセージ
+======================================== */
+
+#memoryFlowMessage {
+    position:
+        fixed;
+
+    left:
+        50%;
+
+    bottom:
+        100px;
+
+    transform:
+        translate(
+            -50%,
+            20px
+        );
+
+    z-index:
+        30000;
+
+    max-width:
+        90vw;
+
+    padding:
+        11px 18px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.25
+        );
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(
+            4,
+            20,
+            55,
+            0.92
+        );
+
+    color:
+        white;
+
+    font-size:
+        13px;
+
+    text-align:
+        center;
+
+    white-space:
+        nowrap;
+
+    box-shadow:
+        0 10px 35px
+        rgba(
+            0,
+            0,
+            0,
+            0.35
+        );
+
+    opacity:
+        0;
+
+    visibility:
+        hidden;
+
+    pointer-events:
+        none;
+
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease,
+        visibility 0.2s ease;
+}
+
+#memoryFlowMessage.show {
+    opacity:
+        1;
+
+    visibility:
+        visible;
+
+    transform:
+        translate(
+            -50%,
+            0
+        );
+}
+
+
+/* ========================================
+   モーダル表示中
+======================================== */
+
+body.mf-modal-open {
+    overflow:
+        hidden;
+}
+
+
+/* ========================================
+   PC マウス操作
+======================================== */
+
+@media (
+    hover: hover
+) {
+
+    .photo:not(.new-photo):hover {
+        filter:
+            brightness(1.05);
+
+        box-shadow:
+            0 16px 38px
+            rgba(
+                0,
+                0,
+                0,
+                0.38
+            );
+    }
+
+    .mf-action-button:hover,
+    .mf-selection-button:not(:disabled):hover {
+        filter:
+            brightness(1.08);
+    }
+}
+
+
+/* ========================================
    スマホ
 ======================================== */
 
@@ -715,7 +1514,6 @@ body {
             14px;
     }
 
-
     .wedding-small-title {
         font-size:
             10px;
@@ -723,7 +1521,6 @@ body {
         letter-spacing:
             4px;
     }
-
 
     .wedding-names {
         font-size:
@@ -733,7 +1530,6 @@ body {
             1px;
     }
 
-
     .wedding-date {
         font-size:
             13px;
@@ -741,7 +1537,6 @@ body {
         letter-spacing:
             3px;
     }
-
 
     .wedding-message {
         font-size:
@@ -751,12 +1546,10 @@ body {
             2px;
     }
 
-
     .photo {
         padding:
             5px;
     }
-
 
     .photo.new-photo {
         max-width:
@@ -767,10 +1560,9 @@ body {
     }
 
 
-    /*
-       スマホではキラキラを
-       少し小さく表示
-    */
+    /* ====================================
+       スマホ キラキラ
+    ==================================== */
 
     .photo-sparkle {
         filter:
@@ -780,15 +1572,253 @@ body {
             );
     }
 
-
     .photo-sparkle::before {
         height:
             300%;
     }
 
-
     .photo-sparkle::after {
         width:
             300%;
     }
+
+
+    /* ====================================
+       スマホ 写真ビューアー
+    ==================================== */
+
+    .mf-viewer-content {
+        width:
+            94vw;
+
+        max-height:
+            92vh;
+
+        padding:
+            12px;
+
+        border-radius:
+            16px;
+    }
+
+    .mf-viewer-image-area {
+        height:
+            62vh;
+
+        border-radius:
+            10px;
+    }
+
+    .mf-viewer-image {
+        max-width:
+            100%;
+
+        max-height:
+            100%;
+
+        border-width:
+            5px;
+    }
+
+    .mf-close-button {
+        top:
+            -10px;
+
+        right:
+            -7px;
+
+        width:
+            40px;
+
+        height:
+            40px;
+
+        font-size:
+            27px;
+
+        line-height:
+            36px;
+    }
+
+
+    /* ====================================
+       スマホ ビューアーボタン
+    ==================================== */
+
+    .mf-viewer-actions {
+        display:
+            grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap:
+            8px;
+
+        margin-top:
+            12px;
+    }
+
+    .mf-action-button {
+        width:
+            100%;
+
+        min-height:
+            48px;
+
+        padding:
+            10px 8px;
+
+        font-size:
+            13px;
+    }
+
+    #mfStartSelection {
+        grid-column:
+            1 / -1;
+    }
+
+
+    /* ====================================
+       スマホ 選択バー
+    ==================================== */
+
+    #mfSelectionBar {
+        bottom:
+            max(
+                10px,
+                env(
+                    safe-area-inset-bottom
+                )
+            );
+
+        width:
+            calc(
+                100vw - 16px
+            );
+    }
+
+    .mf-selection-inner {
+        display:
+            block;
+
+        padding:
+            10px;
+
+        border-radius:
+            16px;
+    }
+
+    .mf-selection-info {
+        justify-content:
+            center;
+
+        margin-bottom:
+            8px;
+
+        padding:
+            0;
+    }
+
+    #mfSelectionCount {
+        font-size:
+            24px;
+    }
+
+    .mf-selection-actions {
+        display:
+            grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap:
+            7px;
+    }
+
+    .mf-selection-button {
+        width:
+            100%;
+
+        min-height:
+            44px;
+
+        padding:
+            8px 6px;
+
+        font-size:
+            12px;
+    }
+
+    .mf-cancel-selection {
+        grid-column:
+            1 / -1;
+    }
+
+
+    /* ====================================
+       スマホ メッセージ
+    ==================================== */
+
+    #memoryFlowMessage {
+        bottom:
+            115px;
+
+        max-width:
+            calc(
+                100vw - 30px
+            );
+
+        padding:
+            10px 15px;
+
+        font-size:
+            12px;
+
+        white-space:
+            normal;
+    }
+}
+
+
+/* ========================================
+   小さいスマホ
+======================================== */
+
+@media (
+    max-width: 380px
+) {
+
+    .mf-viewer-image-area {
+        height:
+            58vh;
+    }
+
+    .mf-action-button {
+        font-size:
+            12px;
+    }
+
+    .mf-selection-button {
+        font-size:
+            11px;
+    }
+}
+/* ========================================
+   MEMORY FLOW 新しい背景
+======================================== */
+
+.wedding-background {
+    position: fixed;
+    inset: 0;
+
+    background-image: url("./images/memory-flow-bg.jpg");
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+
+    width: 100%;
+    height: 100vh;
+
+    z-index: -10;
 }
