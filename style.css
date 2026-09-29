@@ -1811,7 +1811,7 @@ body.mf-modal-open {
     position: fixed;
     inset: 0;
 
-    background-image: url("./images/memory-flow-bg.jpg");
+    background-image: url("./images/memory-flow-bg.jpg.jpg");
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
